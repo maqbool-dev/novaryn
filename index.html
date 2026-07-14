@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novaryn — Architecting Your Digital Reality</title>
+  <meta name="description" content="Novaryn crafts high-performance digital architectures that drive growth. Platforms built for structure, speed, and conversion.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=13">
+</head>
+<body>
+
+  <!-- ===== Load curtain ===== -->
+  <div class="curtain" aria-hidden="true">
+    <svg class="curtain-mark" viewBox="0 0 100 100">
+      <circle class="curtain-ring" cx="50" cy="50" r="36" pathLength="100"/>
+      <circle class="curtain-dot" cx="78" cy="21" r="12"/>
+    </svg>
+  </div>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header" id="top">
+    <div class="header-inner">
+      <a class="logo" href="#top" aria-label="Novaryn home">
+        <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="logo-ring" cx="50" cy="50" r="36" pathLength="100"/>
+          <circle class="logo-dot" cx="78" cy="21" r="12"/>
+        </svg>
+        <span class="logo-word">Novaryn</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Primary">
+        <a href="#top" class="nav-link is-active">Home</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#work" class="nav-link">Work</a>
+        <a href="#process" class="nav-link">Process</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="header-right">
+        <div class="search-pill">
+          <input type="text" placeholder="/am looking for..." aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <a href="#contact" class="btn btn-solid magnetic">Start a project</a>
+      </div>
+
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Mobile menu ===== -->
+  <div class="mobile-menu" aria-hidden="true">
+    <nav aria-label="Mobile">
+      <a href="#top">Home</a>
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="btn btn-solid">Start a project</a>
+  </div>
+
+  <main>
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+      <div class="hero-panels" aria-hidden="true">
+        <div class="panel panel-right"></div>
+        <div class="panel panel-diag"></div>
+      </div>
+
+      <div class="stat-band" aria-hidden="true"></div>
+      <svg class="hero-bracket" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <polyline pathLength="100" points="0,1 38,1 38,99 100,99" vector-effect="non-scaling-stroke"/>
+      </svg>
+
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1 class="hero-title">
+            <span class="line"><span class="line-in">
+              <span class="ellipse-wrap">Novaryn
+                <svg class="ellipse" viewBox="0 0 600 240" aria-hidden="true">
+                  <ellipse pathLength="100" cx="300" cy="120" rx="282" ry="96" transform="rotate(-5 300 120)"/>
+                </svg>
+              </span>
+            </span></span>
+            <span class="line"><span class="line-in">Architecting</span></span>
+            <span class="line"><span class="line-in">Your Digital</span></span>
+            <span class="line"><span class="line-in">Reality<span class="title-dot" aria-hidden="true"></span></span></span>
+          </h1>
+
+          <div class="hero-trust">
+            <p class="trust-label">Trusted by brands worldwide</p>
+            <div class="trust-row">
+              <div class="avatars" aria-hidden="true">
+                <span class="avatar av-1"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4L20 19H4L12 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
+                <span class="avatar av-2"><svg viewBox="0 0 24 24" fill="none"><circle cx="11.5" cy="12.5" r="6.5" stroke="currentColor" stroke-width="2"/><circle cx="18.5" cy="6" r="2.4" fill="currentColor"/></svg></span>
+                <span class="avatar av-3"><svg viewBox="0 0 24 24" fill="none"><path d="M6 19V10M12 19V5M18 19v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+                <span class="avatar av-4"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l4.5 6L6 18M13 6l4.5 6L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <span class="trust-count" data-count="60" data-suffix="+">60+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-figure" aria-hidden="true">
+          <div class="figure-halo"></div>
+          <img class="subject" src="assets/subject-cutout.png" alt="" fetchpriority="high">
+        </div>
+
+        <aside class="hero-aside">
+          <div class="stat-block">
+            <span class="stat-number"><span data-count="98.5" data-decimals="1">98.5</span>%</span>
+            <span class="stat-label">Client acquisition</span>
+          </div>
+          <p class="hero-lede">We craft high-performance digital architectures that drive growth. Our platforms are built for structure, speed, and conversion.</p>
+          <a href="#services" class="aside-link">
+            Explore services
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </aside>
+      </div>
+
+    </section>
+
+    <!-- ===== Morph scene ===== -->
+    <section class="morph" aria-label="Perspective">
+      <div class="morph-stage">
+        <div class="morph-figs" aria-hidden="true">
+          <img class="morph-img morph-img-a" src="assets/subject-cutout.png" alt="">
+          <img class="morph-img morph-img-b" src="assets/subject-profile.png" alt="">
+        </div>
+        <canvas class="morph-canvas" aria-hidden="true"></canvas>
+        <div class="morph-head">
+          <p class="eyebrow"><span class="dot"></span>Perspective</p>
+          <h2 class="section-title">We see it<br>from every angle</h2>
+          <p class="morph-lede">Front-on or in profile, the structure holds — same subject, every detail intact.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Client marquee ===== -->
+    <section class="marquee-band" aria-label="Clients">
+      <div class="marquee" data-speed="1">
+        <div class="marquee-track">
+          <span class="client">AuraCorp</span><span class="m-dot"></span>
+          <span class="client">QuantumWeb</span><span class="m-dot"></span>
+          <span class="client">Vantive</span><span class="m-dot"></span>
+          <span class="client">HelixLab</span><span class="m-dot"></span>
+          <span class="client">NorthPeak</span><span class="m-dot"></span>
+          <span class="client">Strata&nbsp;Digital</span><span class="m-dot"></span>
+          <span class="client">Meridian</span><span class="m-dot"></span>
+          <span class="client">AuraCorp</span><span class="m-dot"></span>
+          <span class="client">QuantumWeb</span><span class="m-dot"></span>
+          <span class="client">Vantive</span><span class="m-dot"></span>
+          <span class="client">HelixLab</span><span class="m-dot"></span>
+          <span class="client">NorthPeak</span><span class="m-dot"></span>
+          <span class="client">Strata&nbsp;Digital</span><span class="m-dot"></span>
+          <span class="client">Meridian</span><span class="m-dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Services ===== -->
+    <section class="services section" id="services">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="dot"></span>What we build</p>
+          <h2 class="section-title">Every layer of your<br>digital presence</h2>
+        </div>
+
+        <ul class="service-list">
+          <li class="service-row reveal">
+            <h3 class="service-name">Digital Platforms</h3>
+            <p class="service-desc">High-performance sites and web apps engineered for speed, stability, and conversion.</p>
+            <span class="service-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </li>
+          <li class="service-row reveal">
+            <h3 class="service-name">Brand Systems</h3>
+            <p class="service-desc">Identity, guidelines, and design languages that stay coherent across every touchpoint.</p>
+            <span class="service-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </li>
+          <li class="service-row reveal">
+            <h3 class="service-name">E-Commerce Architecture</h3>
+            <p class="service-desc">Storefronts built for structure and speed, with checkout flows that actually convert.</p>
+            <span class="service-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </li>
+          <li class="service-row reveal">
+            <h3 class="service-name">Product &amp; UX</h3>
+            <p class="service-desc">Interfaces designed around how your customers behave, not how your org chart looks.</p>
+            <span class="service-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Metrics ===== -->
+    <section class="metrics section-dark">
+      <div class="container metrics-grid">
+        <div class="metric reveal">
+          <span class="metric-num"><span data-count="60">0</span>+</span>
+          <span class="metric-label">Brands worldwide</span>
+        </div>
+        <div class="metric reveal">
+          <span class="metric-num"><span data-count="98.5" data-decimals="1">0</span>%</span>
+          <span class="metric-label">Client acquisition</span>
+        </div>
+        <div class="metric reveal">
+          <span class="metric-num"><span data-count="4">0</span>+</span>
+          <span class="metric-label">Years architecting</span>
+        </div>
+        <div class="metric reveal">
+          <span class="metric-num"><span data-count="120">0</span>+</span>
+          <span class="metric-label">Projects delivered</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Work ===== -->
+    <section class="work section" id="work">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="dot"></span>Selected work</p>
+          <h2 class="section-title">Built for structure,<br>measured in growth</h2>
+        </div>
+
+        <div class="work-grid">
+          <article class="work-card reveal">
+            <div class="work-visual wv-grid" aria-hidden="true"><span class="wv-dot"></span></div>
+            <div class="work-meta">
+              <h3>AuraCorp</h3>
+              <p>Platform replatform &amp; design system</p>
+              <span class="work-stat">+212% qualified signups</span>
+            </div>
+          </article>
+          <article class="work-card reveal">
+            <div class="work-visual wv-rings" aria-hidden="true"><span class="wv-dot"></span></div>
+            <div class="work-meta">
+              <h3>QuantumWeb</h3>
+              <p>Brand system &amp; marketing site</p>
+              <span class="work-stat">2.4s → 0.8s load time</span>
+            </div>
+          </article>
+          <article class="work-card reveal">
+            <div class="work-visual wv-cols" aria-hidden="true"><span class="wv-dot"></span></div>
+            <div class="work-meta">
+              <h3>Vantive</h3>
+              <p>E-commerce architecture</p>
+              <span class="work-stat">+38% checkout conversion</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Process ===== -->
+    <section class="process section" id="process">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow"><span class="dot"></span>How we work</p>
+          <h2 class="section-title">From first call<br>to shipped reality</h2>
+        </div>
+
+        <ol class="process-grid">
+          <li class="process-step reveal">
+            <span class="step-num">01</span>
+            <h3>Discover</h3>
+            <p>We map your market, your customers, and what your digital presence has to do for the business.</p>
+          </li>
+          <li class="process-step reveal">
+            <span class="step-num">02</span>
+            <h3>Architect</h3>
+            <p>Structure before surface. Information architecture, technical stack, and conversion paths — decided on paper first.</p>
+          </li>
+          <li class="process-step reveal">
+            <span class="step-num">03</span>
+            <h3>Build</h3>
+            <p>Design and engineering in one room. You see working software weekly, not a big reveal at the end.</p>
+          </li>
+          <li class="process-step reveal">
+            <span class="step-num">04</span>
+            <h3>Scale</h3>
+            <p>Launch is the starting line. We measure, tune, and grow what we shipped alongside your team.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta section-dark" id="contact">
+      <div class="container cta-inner">
+        <p class="eyebrow eyebrow-light reveal"><span class="dot"></span>Next project</p>
+        <h2 class="cta-title reveal">Your digital reality<br>is next<span class="title-dot" aria-hidden="true"></span></h2>
+        <div class="cta-actions reveal">
+          <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener" class="btn btn-green magnetic">Start a project</a>
+          <a href="tel:+923207203369" class="cta-mail">+92 320 7203369</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="logo logo-invert" href="#top" aria-label="Back to top">
+          <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="logo-ring" cx="50" cy="50" r="36" pathLength="100"/>
+            <circle class="logo-dot" cx="78" cy="21" r="12"/>
+          </svg>
+          <span class="logo-word">Novaryn</span>
+        </a>
+        <p>High-performance digital architectures, built for structure, speed, and conversion.</p>
+      </div>
+      <nav class="footer-col" aria-label="Site">
+        <h4>Site</h4>
+        <a href="#top">Home</a>
+        <a href="#services">Services</a>
+        <a href="#work">Work</a>
+        <a href="#process">Process</a>
+      </nav>
+      <nav class="footer-col" aria-label="Social">
+        <h4>Social</h4>
+        <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="#">Instagram</a>
+        <a href="#">X / Twitter</a>
+        <a href="#">Dribbble</a>
+      </nav>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="tel:+923207203369">+92 320 7203369</a>
+        <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">linkedin.com/novarynstudios</a>
+      </div>
+    </div>
+    <div class="container footer-base">
+      <span>© 2026 Novaryn. All rights reserved.</span>
+      <span>Architecting your digital reality<span class="dot dot-inline"></span></span>
+    </div>
+  </footer>
+
+  <script src="js/main.js?v=13"></script>
+</body>
+</html>
