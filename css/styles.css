@@ -62,7 +62,7 @@ ul, ol { list-style: none; }
   background: var(--ink);
   display: grid;
   place-items: center;
-  transition: transform 0.7s var(--ease-out) 0.55s;
+  transition: transform 0.7s var(--ease-out) 0.35s;
 }
 .curtain-mark { width: 72px; }
 .curtain-ring {
@@ -130,7 +130,7 @@ body.is-loaded .curtain-dot { animation: none; }
   border-radius: 999px;
   border: 1px solid var(--ink);
   white-space: nowrap;
-  transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+  transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out), transform 0.25s var(--ease-out);
   will-change: transform;
 }
 .btn-solid { background: var(--ink); color: var(--white); }
@@ -521,9 +521,10 @@ body.is-loaded .subject { opacity: 1; transform: translateY(0) scale(1); }
 .morph-stage {
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100svh;
   overflow: hidden;
 }
+.morph-figs { pointer-events: none; }
 /* fixed so particles can fly with the hero subject as it scrolls, then land
    in the pinned stage; JS drives opacity, z-index sits below the header (100) */
 .morph-canvas {
@@ -671,7 +672,7 @@ body.is-loaded .subject { opacity: 1; transform: translateY(0) scale(1); }
 }
 .service-row.wipe-bottom::before { transform-origin: bottom; }
 .service-row:hover::before { transform: scaleY(1); }
-.service-row > * { position: relative; transition: color 0.35s var(--ease-out); }
+.service-row > * { position: relative; transition: color 0.45s var(--ease-out); }
 .service-row:hover { padding-left: 2rem; }
 .service-row:hover > * { color: var(--white); }
 
@@ -832,7 +833,6 @@ body.is-loaded .subject { opacity: 1; transform: translateY(0) scale(1); }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(1.5rem, 3vw, 3rem);
-  counter-reset: step;
 }
 .process-step {
   border-top: 2px solid var(--ink);
@@ -950,19 +950,28 @@ body.is-loaded .subject { opacity: 1; transform: translateY(0) scale(1); }
   .subject { width: min(78vw, 460px); }
   .stat-band, .hero-bracket { display: none; }
 
-  /* morph scene: no canvas on touch/narrow — both poses shown statically */
-  .morph { height: auto; }
-  .morph-stage {
+  /* morph scene, canvas running: shorter scrub, head copy across the top */
+  .morph.is-canvas { height: 230vh; }
+  .morph.is-canvas .morph-head {
+    left: var(--gutter);
+    right: var(--gutter);
+    top: 11%;
+    transform: none;
+    max-width: none;
+  }
+  /* morph scene, no canvas (JS failed / reduced data): both poses statically */
+  .morph:not(.is-canvas) { height: auto; }
+  .morph:not(.is-canvas) .morph-stage {
     position: static;
     height: auto;
     overflow: visible;
     padding: 4rem var(--gutter) 3rem;
   }
-  .morph-canvas { display: none; }
-  .morph-head { position: static; transform: none; max-width: none; margin-bottom: 2.5rem; }
-  .morph-figs { display: flex; align-items: flex-end; gap: 1.5rem; }
-  .morph-img { position: static; transform: none; width: min(44%, 340px); opacity: 1 !important; }
-  .morph-img-b { display: block; }
+  .morph:not(.is-canvas) .morph-canvas { display: none; }
+  .morph:not(.is-canvas) .morph-head { position: static; transform: none; max-width: none; margin-bottom: 2.5rem; }
+  .morph:not(.is-canvas) .morph-figs { display: flex; align-items: flex-end; gap: 1.5rem; }
+  .morph:not(.is-canvas) .morph-img { position: static; transform: none; width: min(44%, 340px); opacity: 1 !important; }
+  .morph:not(.is-canvas) .morph-img-b { display: block; }
   .hero-aside {
     order: 2;
     padding-left: 0;
@@ -972,7 +981,6 @@ body.is-loaded .subject { opacity: 1; transform: translateY(0) scale(1); }
     gap: 1.4rem;
     margin-top: 1.5rem;
   }
-  .hero-connector { display: none; }
 
   .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem 2rem; }
   .work-grid { grid-template-columns: 1fr; }

@@ -147,17 +147,19 @@
 
   /* ---------- Morph scene: subject dissolves to particles, reforms in profile ---------- */
   const morph = document.querySelector(".morph");
-  const morphDesktop = window.matchMedia("(min-width: 1101px)");
-  if (morph && !reduceMotion && morphDesktop.matches) {
+  if (morph && !reduceMotion) {
     const canvas = morph.querySelector(".morph-canvas");
     const morphHead = morph.querySelector(".morph-head");
+    const morphImgB = morph.querySelector(".morph-img-b");
     const heroFigure = document.querySelector(".hero-figure");
+    const heroSubject = document.querySelector(".hero .subject");
     const ctx = canvas.getContext("2d");
     let pairs = [];
     let startY = 40;
     let endY = 1;
-    let progress = -1;
-    let morphRaf = null;
+    let targetP = 0;
+    let shownP = -1;
+    let rafOn = false;
 
     const samplePoints = (img, w, h, stride, offsetX, offsetY) => {
       const off = document.createElement("canvas");
@@ -189,28 +191,42 @@
     const build = (imgA, imgB) => {
       const w = window.innerWidth;
       const h = window.innerHeight;
+      const narrow = w <= 1100;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       // A = the hero subject's box in DOCUMENT coords, so particles start glued
-      // to the real hero figure and travel with it as it scrolls; the figure
-      // wrapper is used because the img itself is transformed during load-in
-      const subjRect = heroFigure.getBoundingClientRect();
-      const subjW = Math.round(subjRect.width) || 500;
-      const aX = subjRect.left;
-      const aY = subjRect.top + window.scrollY;
-      // B = the profile's resting spot in VIEWPORT coords (stage is pinned there)
-      const bX = w * 0.1;
-      // target ~4.5k particles whatever the subject size; silhouette covers ~45% of its box
-      let stride = Math.max(4, Math.round(Math.sqrt((subjW * subjW * 0.45) / 4500)));
+      // to the real hero figure and travel with it as it scrolls. offsetWidth
+      // ignores the img's load-in transform; on mobile the figure wrapper is
+      // full-width with the img centered inside, so centre within its rect.
+      const figRect = heroFigure.getBoundingClientRect();
+      const subjW = heroSubject.offsetWidth || Math.round(figRect.width) || 500;
+      const aX = figRect.left + (figRect.width - subjW) / 2;
+      const aY = figRect.top + window.scrollY;
+      // B = the profile's resting spot in VIEWPORT coords (stage is pinned
+      // there): left of centre on desktop, centred and nudged down on mobile
+      // so it clears the section copy at the top of the stage
+      const bX = narrow ? Math.max((w - subjW) / 2, 8) : w * 0.1;
+      const bYExtra = narrow ? h * 0.08 : 0;
+      // pin the crisp profile img to the exact box the particles converge on,
+      // so the end-of-morph crossfade never shifts position or size
+      const subjHB = Math.round(subjW * (imgB.naturalHeight / imgB.naturalWidth));
+      morphImgB.style.width = `${subjW}px`;
+      morphImgB.style.left = `${bX}px`;
+      morphImgB.style.top = `${(h - subjHB) / 2 + bYExtra}px`;
+      morphImgB.style.transform = "none";
+      // particle budget scales with viewport so phones stay smooth
+      const budget = w < 720 ? 2200 : narrow ? 3200 : 4500;
+      const ampScale = Math.max(0.55, Math.min(w / 1200, 1));
+      let stride = Math.max(3, Math.round(Math.sqrt((subjW * subjW * 0.45) / budget)));
       const make = (img, ox, oy, centerB) => {
         const subjH = Math.round(subjW * (img.naturalHeight / img.naturalWidth));
-        return samplePoints(img, subjW, subjH, stride, ox, centerB ? (h - subjH) / 2 : oy);
+        return samplePoints(img, subjW, subjH, stride, ox, centerB ? (h - subjH) / 2 + bYExtra : oy);
       };
       let a = make(imgA, aX, aY, false);
       let b = make(imgB, bX, 0, true);
-      while (Math.max(a.length, b.length) > 6500 && stride < 12) {
+      while (Math.max(a.length, b.length) > budget * 1.45 && stride < 12) {
         stride++;
         a = make(imgA, aX, aY, false);
         b = make(imgB, bX, 0, true);
@@ -227,13 +243,13 @@
           b: b[i % b.length],
           dx: Math.cos(theta),
           dy: Math.sin(theta),
-          amp: 40 + Math.random() * 110,
+          amp: (40 + Math.random() * 110) * ampScale,
           size: 1.5 + Math.random() * 1.5,
         };
       }
       startY = 40;
       endY = morph.getBoundingClientRect().top + window.scrollY + Math.max(morph.offsetHeight - h, 1);
-      progress = -1; // force a restyle on the next scrub
+      shownP = -1; // force a restyle on the next scrub
     };
 
     const draw = (p, scrollNow) => {
@@ -252,41 +268,61 @@
       }
     };
 
-    const scrub = () => {
-      const run = () => {
-        const scrollNow = window.scrollY;
-        const p = Math.min(Math.max((scrollNow - startY) / (endY - startY), 0), 1);
-        morphRaf = null;
-        // nothing to do while parked at either end — cheap early-out replaces
-        // the IntersectionObserver gate now that the scene starts at page top
-        if (p === progress && (p === 0 || p === 1)) return;
-        progress = p;
-        if (p === 0) {
-          canvas.style.opacity = "0";
-          heroFigure.style.opacity = "";
-          morphHead.style.opacity = "0";
-          morph.classList.remove("morph-done");
-          return;
-        }
-        if (p === 1) {
-          canvas.style.opacity = "0";
-          heroFigure.style.opacity = "";
-          morphHead.style.opacity = "1";
-          morph.classList.add("morph-done");
-          return;
-        }
-        // hand-off: the real hero figure fades to the particle canvas over the
-        // first few percent of the scrub, and back again when scrolling up
-        const intro = Math.min(p / 0.05, 1);
-        canvas.style.opacity = intro.toFixed(3);
-        heroFigure.style.opacity = (1 - intro).toFixed(3);
-        morphHead.style.opacity = Math.min(Math.max((p - 0.55) / 0.3, 0), 1).toFixed(3);
+    const applyState = (p, scrollNow) => {
+      // nothing to do while parked at either end — cheap early-out replaces
+      // the IntersectionObserver gate now that the scene starts at page top
+      const parked = p === shownP && (p === 0 || p === 1);
+      shownP = p;
+      if (parked) return;
+      if (p === 0) {
+        canvas.style.opacity = "0";
+        heroFigure.style.opacity = "";
+        morphHead.style.opacity = "0";
         morph.classList.remove("morph-done");
-        draw(p, scrollNow);
-      };
-      if (document.hidden) { run(); return; } // rAF is suspended while hidden
-      if (morphRaf) return;
-      morphRaf = requestAnimationFrame(run);
+        return;
+      }
+      if (p === 1) {
+        canvas.style.opacity = "0";
+        heroFigure.style.opacity = "";
+        morphHead.style.opacity = "1";
+        morph.classList.add("morph-done");
+        return;
+      }
+      // hand-off: the real hero figure fades to the particle canvas over the
+      // first few percent of the scrub, and back again when scrolling up
+      const intro = Math.min(p / 0.05, 1);
+      canvas.style.opacity = intro.toFixed(3);
+      heroFigure.style.opacity = (1 - intro).toFixed(3);
+      morphHead.style.opacity = Math.min(Math.max((p - 0.55) / 0.3, 0), 1).toFixed(3);
+      morph.classList.remove("morph-done");
+      draw(p, scrollNow);
+    };
+
+    const computeTarget = () =>
+      Math.min(Math.max((window.scrollY - startY) / (endY - startY), 0), 1);
+
+    // shown progress eases toward the scroll target each frame, so the scene
+    // glides through wheel steps and touch flicks instead of jumping per event
+    const tick = () => {
+      targetP = computeTarget();
+      const gap = targetP - shownP;
+      const next = Math.abs(gap) < 0.001 ? targetP : shownP + gap * 0.16;
+      applyState(next, window.scrollY);
+      if (shownP !== targetP) {
+        requestAnimationFrame(tick);
+      } else {
+        rafOn = false;
+      }
+    };
+
+    const scrub = () => {
+      if (document.hidden) { // rAF is suspended while hidden — snap directly
+        applyState(computeTarget(), window.scrollY);
+        return;
+      }
+      if (rafOn) return;
+      rafOn = true;
+      requestAnimationFrame(tick);
     };
 
     const morphImgs = ["assets/subject-cutout.png", "assets/subject-profile.png"].map((src) => {
@@ -299,14 +335,29 @@
         build(morphImgs[0], morphImgs[1]);
         morph.classList.add("is-canvas");
         scrub();
-        window.addEventListener("scroll", scrub, { passive: true });
-        let morphResizeT = null;
-        window.addEventListener("resize", () => {
-          clearTimeout(morphResizeT);
-          morphResizeT = setTimeout(() => {
+        // re-anchor whenever late-arriving layout (hero image, fonts, load)
+        // shifts the sections the particle coordinates were sampled against
+        let rebuildT = null;
+        const scheduleRebuild = () => {
+          clearTimeout(rebuildT);
+          rebuildT = setTimeout(() => {
             build(morphImgs[0], morphImgs[1]);
             scrub();
-          }, 150);
+          }, 120);
+        };
+        if (document.readyState === "complete") scheduleRebuild();
+        else window.addEventListener("load", scheduleRebuild);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleRebuild);
+        window.addEventListener("scroll", scrub, { passive: true });
+        let lastW = window.innerWidth;
+        let lastH = window.innerHeight;
+        window.addEventListener("resize", () => {
+          // ignore height-only wobble from mobile URL bars collapsing —
+          // rebuilding mid-scroll would make the scene jump
+          if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 140) return;
+          lastW = window.innerWidth;
+          lastH = window.innerHeight;
+          scheduleRebuild();
         });
       })
       .catch(() => { /* image load failed — the static fallback img stays visible */ });
