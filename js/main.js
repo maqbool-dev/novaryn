@@ -157,6 +157,7 @@
     let pairs = [];
     let startY = 40;
     let endY = 1;
+    let unpinY = 1;
     let targetP = 0;
     let shownP = -1;
     let rafOn = false;
@@ -248,7 +249,13 @@
         };
       }
       startY = 40;
-      endY = morph.getBoundingClientRect().top + window.scrollY + Math.max(morph.offsetHeight - h, 1);
+      // the scrub completes at ~72% of the pinned distance — the remaining
+      // scroll is dwell room so the eased animation finishes while the stage
+      // is still pinned, even on fast flings
+      const pinRange = Math.max(morph.offsetHeight - h, 1);
+      const pinTop = morph.getBoundingClientRect().top + window.scrollY;
+      unpinY = pinTop + pinRange;
+      endY = pinTop + pinRange * 0.72;
       shownP = -1; // force a restyle on the next scrub
     };
 
@@ -301,12 +308,28 @@
     const computeTarget = () =>
       Math.min(Math.max((window.scrollY - startY) / (endY - startY), 0), 1);
 
+    // anchor-link jumps (nav, "explore services") shouldn't be caught by the
+    // scroll hold below — let them snap straight through the scene instead
+    let snapUntil = 0;
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener("click", () => { snapUntil = performance.now() + 1700; });
+    });
+
     // shown progress eases toward the scroll target each frame, so the scene
     // glides through wheel steps and touch flicks instead of jumping per event
     const tick = () => {
       targetP = computeTarget();
+      const snap = performance.now() < snapUntil;
       const gap = targetP - shownP;
-      const next = Math.abs(gap) < 0.001 ? targetP : shownP + gap * 0.16;
+      // if a fling outruns the dwell room, complete instantly the moment the
+      // stage would unpin — the figure is never carried away half-formed
+      const mustFinish = targetP === 1 && window.scrollY >= unpinY - 8;
+      // catch up faster on big jumps and on the final approach
+      const factor = targetP === 1 ? 0.45 : Math.abs(gap) > 0.2 ? 0.3 : 0.16;
+      const next =
+        snap || mustFinish || shownP < 0 || Math.abs(gap) < 0.001
+          ? targetP
+          : shownP + gap * factor;
       applyState(next, window.scrollY);
       if (shownP !== targetP) {
         requestAnimationFrame(tick);
@@ -330,7 +353,15 @@
       im.src = src;
       return im;
     });
-    Promise.all(morphImgs.map((im) => im.decode()))
+    // wait on load, not decode() — decode promises stall in background tabs
+    const imgReady = (im) =>
+      im.complete && im.naturalWidth
+        ? Promise.resolve()
+        : new Promise((res, rej) => {
+            im.addEventListener("load", res, { once: true });
+            im.addEventListener("error", rej, { once: true });
+          });
+    Promise.all(morphImgs.map(imgReady))
       .then(() => {
         build(morphImgs[0], morphImgs[1]);
         morph.classList.add("is-canvas");
