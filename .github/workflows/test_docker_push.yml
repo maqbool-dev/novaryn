@@ -6,7 +6,7 @@ on:
   push:
     branches: [test_CI]
   pull_request:
-    branches: [test_CI]
+    branches: [main]
 
 # Cancel an older run for the same branch/PR if a new commit lands before it finishes
 concurrency:
