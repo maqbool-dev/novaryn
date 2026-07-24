@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
@@ -52,16 +52,16 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Only log in when we're actually going to push. On pull_request runs (especially from forks),
       # GitHub does not expose repo secrets at all — attempting login there would just fail the job.
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           # Docker Hub Access Token, not your account password.
@@ -72,7 +72,7 @@ jobs:
       # "latest" is only applied on real pushes, not on PR validation builds
       - name: Extract metadata (tags)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: maqbool404/novaryn
           tags: |
@@ -82,7 +82,7 @@ jobs:
       # On a PR: builds the image to prove the Dockerfile is valid, but does NOT push it anywhere.
       # On a push to Git_test_CI: builds AND pushes to Docker Hub.
       - name: Build (and push on Git_test_CI only)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
