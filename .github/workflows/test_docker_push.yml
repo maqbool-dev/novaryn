@@ -4,9 +4,9 @@ name: Test, Build & Push Docker Image
 # PRs get tested + build-validated; only actual pushes to Git_test_CI publish to Docker Hub (see note below).
 on:
   push:
-    branches: [Git_test_CI]
+    branches: [test_CI]
   pull_request:
-    branches: [Git_test_CI]
+    branches: [test_CI]
 
 # Cancel an older run for the same branch/PR if a new commit lands before it finishes
 concurrency:
