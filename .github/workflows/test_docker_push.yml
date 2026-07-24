@@ -31,7 +31,7 @@ jobs:
 
       # Simple test #1 — HTML lint: catches unclosed tags, bad nesting, duplicate IDs, missing alt text, etc.
       - name: Lint HTML
-        run: npx --yes htmlhint "**/*.html" --exclude "node_modules/**"
+        run: npx --yes htmlhint "**/*.html" --ignore "node_modules/**"
 
       # Simple test #2 — JS syntax check: parses every .js file without executing it.
       # Catches typos/syntax errors even though there's no unit test framework on a vanilla-JS static site.
