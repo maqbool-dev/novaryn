@@ -807,9 +807,16 @@ section[id] { scroll-margin-top: 5.5rem; }
   gap: clamp(1.2rem, 2.4vw, 2.2rem);
 }
 .work-card {
+  display: block;
   background: var(--surface);
   overflow: hidden;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+.work-card:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
 .work-visual {
   position: relative;
@@ -872,6 +879,38 @@ section[id] { scroll-margin-top: 5.5rem; }
   transition: background-size 0.5s var(--ease-out);
 }
 .work-card:hover.work-card .wv-cols { background-size: 100% 58%; }
+
+/* Picsly's mesh artwork. Masked rather than <img> so it paints in the live
+   theme's ink — black web on paper, light web on dark — from one asset. */
+.wv-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  /* sized off the frame height so the blob reads as large as the sibling
+     ellipse; the square artwork stays centred in the 4:3 visual */
+  -webkit-mask: url("../assets/work-picsly-mesh.webp") center / auto 104% no-repeat;
+  mask: url("../assets/work-picsly-mesh.webp") center / auto 104% no-repeat;
+  transition: transform 0.6s var(--ease-out);
+}
+.work-card:hover .wv-mesh::before,
+.work-card:focus-visible .wv-mesh::before { transform: rotate(6deg) scale(1.04); }
+
+/* outbound affordance — hover-revealed on pointer devices, always on touch */
+.work-go {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.8em;
+  color: var(--green-soft);
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+}
+.work-card:hover .work-go,
+.work-card:focus-visible .work-go { opacity: 1; transform: translate(0, 0); }
+@media (hover: none) {
+  .work-go { opacity: 1; transform: none; }
+}
 
 .work-meta { padding: 1.5rem 1.6rem 1.7rem; }
 .work-meta h3 {
@@ -1127,6 +1166,10 @@ section[id] { scroll-margin-top: 5.5rem; }
   .logo-dot.is-orbiting { animation: none; }
   /* process steps keep the green rule sweep, drop the zoom */
   .process-step:hover .step-inner { transform: none !important; }
+  /* work cards: keep the link affordance, drop the motion */
+  .wv-mesh::before,
+  .work-card:hover .wv-mesh::before { transform: none !important; transition: none !important; }
+  .work-go { opacity: 1 !important; transform: none !important; transition: none !important; }
   /* cursor-tracking dot grid is skipped in JS; hide the empty canvas */
   .cta-dots { display: none; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
