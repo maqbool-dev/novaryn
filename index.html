@@ -11,7 +11,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=19">
+  <script>
+    /* resolve the theme before first paint so there's no flash of the wrong palette */
+    (() => {
+      try {
+        const saved = localStorage.getItem("novaryn-theme");
+        const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+        if (dark) document.documentElement.dataset.theme = "dark";
+      } catch (e) { /* private mode: fall through to light */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css?v=28">
 </head>
 <body>
 
@@ -24,7 +34,7 @@
   </div>
 
   <!-- ===== Header ===== -->
-  <header class="site-header" id="top">
+  <header class="site-header">
     <div class="header-inner">
       <a class="logo" href="#top" aria-label="Novaryn home">
         <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
@@ -43,10 +53,15 @@
       </nav>
 
       <div class="header-right">
-        <div class="search-pill">
-          <input type="text" placeholder="/am looking for..." aria-label="Search">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2.7v2.1M12 19.2v2.1M2.7 12h2.1M19.2 12h2.1M5.4 5.4l1.5 1.5M17.1 17.1l1.5 1.5M18.6 5.4l-1.5 1.5M6.9 17.1l-1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20.2 14.4A8.4 8.4 0 1 1 9.6 3.8a6.7 6.7 0 0 0 10.6 10.6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <a href="#contact" class="btn btn-solid magnetic">Start a project</a>
       </div>
 
@@ -70,7 +85,7 @@
 
   <main>
     <!-- ===== Hero ===== -->
-    <section class="hero">
+    <section class="hero" id="top">
       <div class="hero-panels" aria-hidden="true">
         <div class="panel panel-right"></div>
         <div class="panel panel-diag"></div>
@@ -86,8 +101,12 @@
           <h1 class="hero-title">
             <span class="line"><span class="line-in">
               <span class="ellipse-wrap">Novaryn
-                <svg class="ellipse" viewBox="0 0 600 240" aria-hidden="true">
-                  <ellipse pathLength="100" cx="300" cy="120" rx="282" ry="96" transform="rotate(-5 300 120)"/>
+                <!-- preserveAspectRatio="none" lets the ellipse stretch to the word's
+                     box; without it the 2.5:1 viewBox was letterboxed and the ring
+                     rendered far narrower than "Novaryn", slicing through the letters -->
+                <svg class="ellipse" viewBox="0 0 600 240" preserveAspectRatio="none" aria-hidden="true">
+                  <ellipse pathLength="100" cx="300" cy="120" rx="292" ry="112"
+                           vector-effect="non-scaling-stroke" transform="rotate(-3 300 120)"/>
                 </svg>
               </span>
             </span></span>
@@ -95,19 +114,6 @@
             <span class="line"><span class="line-in">Your Digital</span></span>
             <span class="line"><span class="line-in">Reality<span class="title-dot" aria-hidden="true"></span></span></span>
           </h1>
-
-          <div class="hero-trust">
-            <p class="trust-label">Trusted by brands worldwide</p>
-            <div class="trust-row">
-              <div class="avatars" aria-hidden="true">
-                <span class="avatar av-1"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4L20 19H4L12 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
-                <span class="avatar av-2"><svg viewBox="0 0 24 24" fill="none"><circle cx="11.5" cy="12.5" r="6.5" stroke="currentColor" stroke-width="2"/><circle cx="18.5" cy="6" r="2.4" fill="currentColor"/></svg></span>
-                <span class="avatar av-3"><svg viewBox="0 0 24 24" fill="none"><path d="M6 19V10M12 19V5M18 19v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
-                <span class="avatar av-4"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l4.5 6L6 18M13 6l4.5 6L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </div>
-              <span class="trust-count" data-count="60" data-suffix="+">60+</span>
-            </div>
-          </div>
         </div>
 
         <div class="hero-figure" aria-hidden="true">
@@ -146,24 +152,25 @@
       </div>
     </section>
 
-    <!-- ===== Client marquee ===== -->
-    <section class="marquee-band" aria-label="Clients">
+    <!-- ===== Value-prop marquee ===== -->
+    <section class="marquee-band" aria-label="What we deliver">
       <div class="marquee" data-speed="1">
         <div class="marquee-track">
-          <span class="client">AuraCorp</span><span class="m-dot"></span>
-          <span class="client">QuantumWeb</span><span class="m-dot"></span>
-          <span class="client">Vantive</span><span class="m-dot"></span>
-          <span class="client">HelixLab</span><span class="m-dot"></span>
-          <span class="client">NorthPeak</span><span class="m-dot"></span>
-          <span class="client">Strata&nbsp;Digital</span><span class="m-dot"></span>
-          <span class="client">Meridian</span><span class="m-dot"></span>
-          <span class="client">AuraCorp</span><span class="m-dot"></span>
-          <span class="client">QuantumWeb</span><span class="m-dot"></span>
-          <span class="client">Vantive</span><span class="m-dot"></span>
-          <span class="client">HelixLab</span><span class="m-dot"></span>
-          <span class="client">NorthPeak</span><span class="m-dot"></span>
-          <span class="client">Strata&nbsp;Digital</span><span class="m-dot"></span>
-          <span class="client">Meridian</span><span class="m-dot"></span>
+          <!-- 7 items, duplicated below: the -50% keyframe needs two identical halves -->
+          <span class="client">Websites That Perform</span><span class="m-dot"></span>
+          <span class="client">Systems That Scale</span><span class="m-dot"></span>
+          <span class="client">Automation That Saves Hours</span><span class="m-dot"></span>
+          <span class="client">Infrastructure You Can Trust</span><span class="m-dot"></span>
+          <span class="client">Design With Discipline</span><span class="m-dot"></span>
+          <span class="client">Architecture That Holds Up</span><span class="m-dot"></span>
+          <span class="client">Support That Doesn’t Disappear</span><span class="m-dot"></span>
+          <span class="client">Websites That Perform</span><span class="m-dot"></span>
+          <span class="client">Systems That Scale</span><span class="m-dot"></span>
+          <span class="client">Automation That Saves Hours</span><span class="m-dot"></span>
+          <span class="client">Infrastructure You Can Trust</span><span class="m-dot"></span>
+          <span class="client">Design With Discipline</span><span class="m-dot"></span>
+          <span class="client">Architecture That Holds Up</span><span class="m-dot"></span>
+          <span class="client">Support That Doesn’t Disappear</span><span class="m-dot"></span>
         </div>
       </div>
     </section>
@@ -278,24 +285,32 @@
 
         <ol class="process-grid">
           <li class="process-step reveal">
-            <span class="step-num">01</span>
-            <h3>Discover</h3>
-            <p>We map your market, your customers, and what your digital presence has to do for the business.</p>
+            <div class="step-inner">
+              <span class="step-num">01</span>
+              <h3>Discover</h3>
+              <p>We map your market, your customers, and what your digital presence has to do for the business.</p>
+            </div>
           </li>
           <li class="process-step reveal">
-            <span class="step-num">02</span>
-            <h3>Architect</h3>
-            <p>Structure before surface. Information architecture, technical stack, and conversion paths — decided on paper first.</p>
+            <div class="step-inner">
+              <span class="step-num">02</span>
+              <h3>Architect</h3>
+              <p>Structure before surface. Information architecture, technical stack, and conversion paths — decided on paper first.</p>
+            </div>
           </li>
           <li class="process-step reveal">
-            <span class="step-num">03</span>
-            <h3>Build</h3>
-            <p>Design and engineering in one room. You see working software weekly, not a big reveal at the end.</p>
+            <div class="step-inner">
+              <span class="step-num">03</span>
+              <h3>Build</h3>
+              <p>Design and engineering in one room. You see working software weekly, not a big reveal at the end.</p>
+            </div>
           </li>
           <li class="process-step reveal">
-            <span class="step-num">04</span>
-            <h3>Scale</h3>
-            <p>Launch is the starting line. We measure, tune, and grow what we shipped alongside your team.</p>
+            <div class="step-inner">
+              <span class="step-num">04</span>
+              <h3>Scale</h3>
+              <p>Launch is the starting line. We measure, tune, and grow what we shipped alongside your team.</p>
+            </div>
           </li>
         </ol>
       </div>
@@ -303,12 +318,12 @@
 
     <!-- ===== CTA ===== -->
     <section class="cta section-dark" id="contact">
+      <canvas class="cta-dots" aria-hidden="true"></canvas>
       <div class="container cta-inner">
         <p class="eyebrow eyebrow-light reveal"><span class="dot"></span>Next project</p>
         <h2 class="cta-title reveal">Your digital reality<br>is next<span class="title-dot" aria-hidden="true"></span></h2>
         <div class="cta-actions reveal">
-          <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener" class="btn btn-green magnetic">Start a project</a>
-          <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="cta-mail">+92 320 7203369</a>
+          <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-green magnetic">Start a project</a>
         </div>
       </div>
     </section>
@@ -353,7 +368,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=19"></script>
+  <script src="js/main.js?v=28"></script>
 </body>
 </html>
 <!-- ci test Fri Jul 24 17:04:30 PKT 2026 -->

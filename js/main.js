@@ -21,6 +21,46 @@
     setTimeout(start, 3000);
   }
 
+  /* ---------- Theme toggle ---------- */
+  /* the initial theme is resolved by the inline script in <head> so the first
+     paint is already correct; this only handles switching + persistence */
+  const themeBtn = document.querySelector(".theme-toggle");
+  const root = document.documentElement;
+  const syncThemeBtn = () => {
+    const dark = root.dataset.theme === "dark";
+    // keep the mobile browser chrome matching the page background
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", dark ? "#0c0c0b" : "#f2f2ef");
+    if (!themeBtn) return;
+    themeBtn.setAttribute("aria-pressed", String(dark));
+    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  };
+  syncThemeBtn();
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const goDark = root.dataset.theme !== "dark";
+      // crossfade the palette, then drop the class so nothing keeps transitioning
+      root.classList.add("theme-swap");
+      if (goDark) root.dataset.theme = "dark";
+      else delete root.dataset.theme;
+      try { localStorage.setItem("novaryn-theme", goDark ? "dark" : "light"); } catch (e) { /* private mode */ }
+      syncThemeBtn();
+      document.dispatchEvent(new CustomEvent("themechange"));
+      setTimeout(() => root.classList.remove("theme-swap"), 420);
+    });
+  }
+  // follow the OS while the visitor hasn't made an explicit choice
+  const osDark = window.matchMedia("(prefers-color-scheme: dark)");
+  osDark.addEventListener("change", (e) => {
+    let saved = null;
+    try { saved = localStorage.getItem("novaryn-theme"); } catch (err) { /* ignore */ }
+    if (saved) return;
+    if (e.matches) root.dataset.theme = "dark";
+    else delete root.dataset.theme;
+    syncThemeBtn();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+
   /* ---------- Logo dot orbit (always completes the full loop) ---------- */
   document.querySelectorAll(".logo").forEach((logo) => {
     const dot = logo.querySelector(".logo-dot");
@@ -50,6 +90,16 @@
   };
   toggle.addEventListener("click", () => setMenu(toggle.getAttribute("aria-expanded") !== "true"));
   menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+
+  /* ---------- Nav underline sweeps with the cursor's direction ---------- */
+  document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
+    const setDir = (e) => {
+      const r = link.getBoundingClientRect();
+      link.classList.toggle("from-right", e.clientX > r.left + r.width / 2);
+    };
+    link.addEventListener("mouseenter", setDir);
+    link.addEventListener("mouseleave", setDir);
+  });
 
   /* ---------- Scroll reveals (staggered per section) ---------- */
   const revealEls = document.querySelectorAll(".reveal");
@@ -111,7 +161,7 @@
   /* ---------- Magnetic buttons ---------- */
   if (!reduceMotion && matchMedia("(pointer: fine)").matches) {
     document.querySelectorAll(".magnetic").forEach((btn) => {
-      const strength = 8;
+      const strength = 6;
       btn.addEventListener("mousemove", (e) => {
         const r = btn.getBoundingClientRect();
         const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
@@ -122,6 +172,105 @@
         btn.style.transform = "";
       });
     });
+  }
+
+  /* ---------- CTA dot grid lights up around the cursor ---------- */
+  const cta = document.querySelector(".cta");
+  const ctaCanvas = cta && cta.querySelector(".cta-dots");
+  if (ctaCanvas && !reduceMotion && matchMedia("(pointer: fine)").matches) {
+    const dctx = ctaCanvas.getContext("2d");
+    const base = document.createElement("canvas");   // static grid, blitted each frame
+    const GAP = 26;                                  // grid spacing
+    const REACH = 175;                               // glow radius
+    const readGreen = () =>
+      (getComputedStyle(root).getPropertyValue("--dot-rgb") || "18, 161, 94").trim();
+    let GREEN = readGreen();                         // tracks the active theme
+    let dpr = 1, cw = 0, ch = 0;
+    let mx = -9999, my = -9999;                      // eased glow centre
+    let tx = -9999, ty = -9999;                      // cursor target
+    let lit = 0, wantLit = 0;                        // halo fade in/out
+    let dotsRaf = null;
+
+    const buildDots = () => {
+      const r = cta.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cw = Math.round(r.width);
+      ch = Math.round(r.height);
+      ctaCanvas.width = base.width = cw * dpr;
+      ctaCanvas.height = base.height = ch * dpr;
+      dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const bctx = base.getContext("2d");
+      bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      GREEN = readGreen();
+      bctx.fillStyle = `rgba(${GREEN}, 0.1)`;        // resting grid, barely there
+      for (let y = GAP / 2; y < ch; y += GAP) {
+        for (let x = GAP / 2; x < cw; x += GAP) {
+          bctx.beginPath();
+          bctx.arc(x, y, 1, 0, 6.2832);
+          bctx.fill();
+        }
+      }
+    };
+
+    const drawDots = () => {
+      dotsRaf = null;
+      mx += (tx - mx) * 0.12;                        // ease toward the cursor
+      my += (ty - my) * 0.12;
+      lit += (wantLit - lit) * 0.09;
+      dctx.clearRect(0, 0, cw, ch);
+      dctx.drawImage(base, 0, 0, cw, ch);
+      // only the dots inside the glow radius get repainted brighter/bigger
+      if (lit > 0.01) {
+        const iMin = Math.max(0, Math.floor((mx - REACH) / GAP));
+        const jMin = Math.max(0, Math.floor((my - REACH) / GAP));
+        const iMax = Math.ceil((mx + REACH) / GAP);
+        const jMax = Math.ceil((my + REACH) / GAP);
+        for (let j = jMin; j <= jMax; j++) {
+          const y = GAP / 2 + j * GAP;
+          if (y >= ch) break;
+          for (let i = iMin; i <= iMax; i++) {
+            const x = GAP / 2 + i * GAP;
+            if (x >= cw) break;
+            const d = Math.hypot(x - mx, y - my);
+            if (d >= REACH) continue;
+            const f = 1 - d / REACH;
+            const glow = f * f * lit;                // squared falloff = soft edge
+            if (glow < 0.01) continue;
+            dctx.beginPath();
+            dctx.arc(x, y, 1 + glow * 1.2, 0, 6.2832);
+            dctx.fillStyle = `rgba(${GREEN}, ${(0.1 + glow * 0.7).toFixed(3)})`;
+            dctx.fill();
+          }
+        }
+      }
+      const settled =
+        Math.abs(tx - mx) < 0.4 && Math.abs(ty - my) < 0.4 && Math.abs(wantLit - lit) < 0.005;
+      if (!settled) queueDots();
+    };
+
+    const queueDots = () => {
+      if (dotsRaf || document.hidden) return;
+      dotsRaf = requestAnimationFrame(drawDots);
+    };
+
+    cta.addEventListener("mousemove", (e) => {
+      const r = cta.getBoundingClientRect();
+      tx = e.clientX - r.left;
+      ty = e.clientY - r.top;
+      if (mx < -1000) { mx = tx; my = ty; }          // first entry: no long sweep in
+      wantLit = 1;
+      queueDots();
+    });
+    cta.addEventListener("mouseleave", () => { wantLit = 0; queueDots(); });
+
+    buildDots();
+    drawDots();                                       // paint the resting grid
+    let dotsResizeT = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(dotsResizeT);
+      dotsResizeT = setTimeout(() => { buildDots(); drawDots(); }, 150);
+    });
+    document.addEventListener("themechange", () => { buildDots(); drawDots(); });
   }
 
   /* ---------- Stat band / bracket alignment ---------- */
@@ -144,6 +293,29 @@
   alignBand();
   window.addEventListener("resize", alignBand);
   window.addEventListener("load", alignBand);
+
+  /* ---------- Hero parallax: the portrait trails the headline ---------- */
+  /* shared with the morph scene below so the particle hand-off lines up exactly */
+  let heroParallax = 0;
+  const heroSubjectEl = document.querySelector(".hero .subject");
+  if (heroSubjectEl && !reduceMotion) {
+    const FACTOR = 0.18;     // portrait scrolls 18% slower than the copy
+    const MAX = 120;
+    let parallaxRaf = null;
+    const applyParallax = () => {
+      parallaxRaf = null;
+      heroParallax = Math.min(window.scrollY * FACTOR, MAX);
+      // `translate` composes with the load-in `transform` instead of replacing it
+      heroSubjectEl.style.translate = `0 ${heroParallax.toFixed(1)}px`;
+    };
+    const queueParallax = () => {
+      if (document.hidden) { applyParallax(); return; }
+      if (parallaxRaf) return;
+      parallaxRaf = requestAnimationFrame(applyParallax);
+    };
+    applyParallax();
+    window.addEventListener("scroll", queueParallax, { passive: true });
+  }
 
   /* ---------- Morph scene: subject dissolves to particles, reforms in profile ---------- */
   const morph = document.querySelector(".morph");
@@ -267,7 +439,9 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < pairs.length; i++) {
         const pt = pairs[i];
-        const aYs = pt.a.y - scrollNow; // A rides along with the page scroll
+        // A rides the page scroll *and* the portrait's parallax offset, so the
+        // hand-off from photo to particles lines up exactly
+        const aYs = pt.a.y - scrollNow + heroParallax;
         const x = pt.a.x + (pt.b.x - pt.a.x) * pe + pt.dx * pt.amp * scatter;
         const y = aYs + (pt.b.y - aYs) * pe + pt.dy * pt.amp * scatter;
         ctx.fillStyle = p < 0.5 ? pt.a.c : pt.b.c;
