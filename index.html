@@ -5,47 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Novaryn — Architecting Your Digital Reality</title>
   <meta name="description" content="Novaryn crafts high-performance digital architectures that drive growth. Platforms built for structure, speed, and conversion.">
-  <meta name="theme-color" content="#0b0b0a">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="512x512" href="assets/novaryn-favicon-512.png">
-  <link rel="preload" as="image" href="assets/subject-profile.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <script>
-    /* resolve the theme before first paint so there's no flash of the wrong palette */
-    (() => {
-      try {
-        const saved = localStorage.getItem("novaryn-theme");
-        const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-        if (dark) document.documentElement.dataset.theme = "dark";
-      } catch (e) { /* private mode: fall through to light */ }
-    })();
-  </script>
-  <link rel="stylesheet" href="css/styles.css?v=29">
+  <!-- Inter + JetBrains Mono come from the design system's token sheet; Archivo (variable
+       width + weight) is what the display headings are set in. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wdth,wght@75..125,400..800&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=1">
 </head>
 <body>
-
-  <!-- ===== Load curtain ===== -->
-  <div class="curtain" aria-hidden="true">
-    <svg class="curtain-mark" viewBox="0 0 100 100">
-      <circle class="curtain-ring" cx="50" cy="50" r="36" pathLength="100"/>
-      <circle class="curtain-dot" cx="78" cy="21" r="12"/>
-    </svg>
-  </div>
 
   <!-- ===== Header ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <a class="logo" href="#top" aria-label="Novaryn home">
-        <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
-          <circle class="logo-ring" cx="50" cy="50" r="36" pathLength="100"/>
-          <circle class="logo-dot" cx="78" cy="21" r="12"/>
-        </svg>
+      <a class="logo" href="#top">
+        <img src="assets/logo-mark.png" alt="Novaryn" width="26" height="26">
         <span class="logo-word">Novaryn</span>
       </a>
 
       <nav class="main-nav" aria-label="Primary">
-        <a href="#top" class="nav-link is-active">Home</a>
         <a href="#services" class="nav-link">Services</a>
         <a href="#work" class="nav-link">Work</a>
         <a href="#process" class="nav-link">Process</a>
@@ -53,277 +32,303 @@
       </nav>
 
       <div class="header-right">
-        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="2"/>
-            <path d="M12 2.7v2.1M12 19.2v2.1M2.7 12h2.1M19.2 12h2.1M5.4 5.4l1.5 1.5M17.1 17.1l1.5 1.5M18.6 5.4l-1.5 1.5M6.9 17.1l-1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M20.2 14.4A8.4 8.4 0 1 1 9.6 3.8a6.7 6.7 0 0 0 10.6 10.6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
         </button>
-        <a href="#contact" class="btn btn-solid magnetic">Start a project</a>
+        <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-primary" data-magnet="4">Start a project</a>
       </div>
-
-      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span>
-      </button>
     </div>
-  </header>
 
-  <!-- ===== Mobile menu ===== -->
-  <div class="mobile-menu" aria-hidden="true">
-    <nav aria-label="Mobile">
-      <a href="#top">Home</a>
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile" hidden>
       <a href="#services">Services</a>
       <a href="#work">Work</a>
       <a href="#process">Process</a>
       <a href="#contact">Contact</a>
     </nav>
-    <a href="#contact" class="btn btn-solid">Start a project</a>
-  </div>
+  </header>
 
   <main>
     <!-- ===== Hero ===== -->
     <section class="hero" id="top">
-      <div class="hero-panels" aria-hidden="true">
-        <div class="panel panel-right"></div>
-        <div class="panel panel-diag"></div>
+      <div class="hero-orbs" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="orb orb-c"></div>
       </div>
-
-      <div class="stat-band" aria-hidden="true"></div>
-      <svg class="hero-bracket" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <polyline pathLength="100" points="0,1 38,1 38,99 100,99" vector-effect="non-scaling-stroke"/>
-      </svg>
+      <canvas class="hero-canvas" aria-hidden="true"></canvas>
 
       <div class="hero-inner">
-        <div class="hero-copy">
-          <h1 class="hero-title">
-            <span class="line"><span class="line-in">
-              <span class="ellipse-wrap">Novaryn
-                <!-- preserveAspectRatio="none" lets the ellipse stretch to the word's
-                     box; without it the 2.5:1 viewBox was letterboxed and the ring
-                     rendered far narrower than "Novaryn", slicing through the letters -->
-                <svg class="ellipse" viewBox="0 0 600 240" preserveAspectRatio="none" aria-hidden="true">
-                  <ellipse pathLength="100" cx="300" cy="120" rx="292" ry="112"
-                           vector-effect="non-scaling-stroke" transform="rotate(-3 300 120)"/>
-                </svg>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="hero-badge" data-reveal>
+              <span class="pulse-dot" aria-hidden="true">
+                <span class="pulse-ring"></span>
+                <span class="pulse-core"></span>
               </span>
-            </span></span>
-            <span class="line"><span class="line-in">Architecting</span></span>
-            <span class="line"><span class="line-in">Your Digital</span></span>
-            <span class="line"><span class="line-in">Reality<span class="title-dot" aria-hidden="true"></span></span></span>
-          </h1>
-        </div>
+              <span class="hero-badge-text">
+                <strong data-count="98.5" data-suffix="%" data-decimals="1">98.5%</strong> client acquisition
+              </span>
+            </div>
 
-        <div class="hero-figure" aria-hidden="true">
-          <div class="figure-halo"></div>
-          <img class="subject" src="assets/subject-cutout.png" alt="" fetchpriority="high">
-        </div>
+            <h1 class="hero-title" data-reveal data-delay="60">Architecting your digital reality<span class="accent-dot">.</span></h1>
 
-        <aside class="hero-aside">
-          <div class="stat-block">
-            <span class="stat-number"><span data-count="98.5" data-decimals="1">98.5</span>%</span>
-            <span class="stat-label">Client acquisition</span>
+            <p class="hero-lede" data-reveal data-delay="140">We craft high-performance digital architectures that drive growth. Our platforms are built for structure, speed, and conversion.</p>
+
+            <div class="hero-actions" data-reveal data-delay="220">
+              <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-magnet="6">Start a project<span class="btn-glyph" aria-hidden="true">→</span></a>
+              <a href="#services" class="btn btn-secondary btn-lg" data-magnet="6">Explore services</a>
+            </div>
+
+            <p class="hero-hint" data-reveal data-delay="300">Move your cursor — the field responds</p>
           </div>
-          <p class="hero-lede">We craft high-performance digital architectures that drive growth. Our platforms are built for structure, speed, and conversion.</p>
-          <a href="#services" class="aside-link">
-            Explore services
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </aside>
-      </div>
 
-    </section>
-
-    <!-- ===== Morph scene ===== -->
-    <section class="morph" aria-label="Perspective">
-      <div class="morph-stage">
-        <div class="morph-figs" aria-hidden="true">
-          <img class="morph-img morph-img-a" src="assets/subject-cutout.png" alt="">
-          <img class="morph-img morph-img-b" src="assets/subject-profile.png" alt="">
-        </div>
-        <canvas class="morph-canvas" aria-hidden="true"></canvas>
-        <div class="morph-head">
-          <p class="eyebrow"><span class="dot"></span>Perspective</p>
-          <h2 class="section-title">We see it<br>from every angle</h2>
-          <p class="morph-lede">Front-on or in profile, the structure holds — same subject, every detail intact.</p>
+          <div class="hero-figure" data-reveal data-delay="180" aria-hidden="true">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+            <div class="ring-spin ring-spin-a"></div>
+            <div class="ring-spin ring-spin-b"></div>
+            <canvas class="figure-canvas"></canvas>
+            <div class="crosshair-v"></div>
+            <div class="crosshair-h"></div>
+            <div class="figure-core-wrap"><div class="figure-core"></div></div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ===== Value-prop marquee ===== -->
-    <section class="marquee-band" aria-label="What we deliver">
-      <div class="marquee" data-speed="1">
-        <div class="marquee-track">
-          <!-- 7 items, duplicated below: the -50% keyframe needs two identical halves -->
-          <span class="client">Websites That Perform</span><span class="m-dot"></span>
-          <span class="client">Systems That Scale</span><span class="m-dot"></span>
-          <span class="client">Automation That Saves Hours</span><span class="m-dot"></span>
-          <span class="client">Infrastructure You Can Trust</span><span class="m-dot"></span>
-          <span class="client">Design With Discipline</span><span class="m-dot"></span>
-          <span class="client">Architecture That Holds Up</span><span class="m-dot"></span>
-          <span class="client">Support That Doesn’t Disappear</span><span class="m-dot"></span>
-          <span class="client">Websites That Perform</span><span class="m-dot"></span>
-          <span class="client">Systems That Scale</span><span class="m-dot"></span>
-          <span class="client">Automation That Saves Hours</span><span class="m-dot"></span>
-          <span class="client">Infrastructure You Can Trust</span><span class="m-dot"></span>
-          <span class="client">Design With Discipline</span><span class="m-dot"></span>
-          <span class="client">Architecture That Holds Up</span><span class="m-dot"></span>
-          <span class="client">Support That Doesn’t Disappear</span><span class="m-dot"></span>
+    <div class="marquee-band" aria-label="What we deliver">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <span class="marquee-item">Websites that perform</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Systems that scale</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Automation that saves hours</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Infrastructure you can trust</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Design with discipline</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Architecture that holds up</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Support that doesn’t disappear</span><span class="marquee-dot"></span>
+        </div>
+        <!-- Duplicate half: the -50% keyframe needs two identical groups to loop seamlessly. -->
+        <div class="marquee-group" aria-hidden="true">
+          <span class="marquee-item">Websites that perform</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Systems that scale</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Automation that saves hours</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Infrastructure you can trust</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Design with discipline</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Architecture that holds up</span><span class="marquee-dot"></span>
+          <span class="marquee-item">Support that doesn’t disappear</span><span class="marquee-dot"></span>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ===== Services ===== -->
-    <section class="services section" id="services">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="dot"></span>What we build</p>
-          <h2 class="section-title">Every layer of your<br>digital presence</h2>
+    <section class="section" id="services">
+      <div class="section-head" data-reveal>
+        <div class="eyebrow">
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          <span class="eyebrow-text">What we build</span>
+        </div>
+        <h2 class="section-title">Every layer of your digital presence</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="service-card" data-reveal data-magnet="5">
+          <div class="service-card-top">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>
+              </svg>
+            </span>
+            <span class="service-num">01</span>
+          </div>
+          <h3>Digital Platforms</h3>
+          <p>High-performance sites and web apps engineered for speed, stability, and conversion.</p>
         </div>
 
-        <ul class="service-list">
-          <li class="service-row reveal">
-            <h3 class="service-name">Digital Platforms</h3>
-            <p class="service-desc">High-performance sites and web apps engineered for speed, stability, and conversion.</p>
-            <span class="service-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="service-card" data-reveal data-delay="80" data-magnet="5">
+          <div class="service-card-top">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>
+              </svg>
             </span>
-          </li>
-          <li class="service-row reveal">
-            <h3 class="service-name">Brand Systems</h3>
-            <p class="service-desc">Identity, guidelines, and design languages that stay coherent across every touchpoint.</p>
-            <span class="service-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="service-num">02</span>
+          </div>
+          <h3>Brand Systems</h3>
+          <p>Identity, guidelines, and design languages that stay coherent across every touchpoint.</p>
+        </div>
+
+        <div class="service-card" data-reveal data-delay="160" data-magnet="5">
+          <div class="service-card-top">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+              </svg>
             </span>
-          </li>
-          <li class="service-row reveal">
-            <h3 class="service-name">E-Commerce Architecture</h3>
-            <p class="service-desc">Storefronts built for structure and speed, with checkout flows that actually convert.</p>
-            <span class="service-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="service-num">03</span>
+          </div>
+          <h3>E-Commerce Architecture</h3>
+          <p>Storefronts built for structure and speed, with checkout flows that actually convert.</p>
+        </div>
+
+        <div class="service-card" data-reveal data-delay="240" data-magnet="5">
+          <div class="service-card-top">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+              </svg>
             </span>
-          </li>
-          <li class="service-row reveal">
-            <h3 class="service-name">Product &amp; UX</h3>
-            <p class="service-desc">Interfaces designed around how your customers behave, not how your org chart looks.</p>
-            <span class="service-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </li>
-        </ul>
+            <span class="service-num">04</span>
+          </div>
+          <h3>Product &amp; UX</h3>
+          <p>Interfaces designed around how your customers behave, not how your org chart looks.</p>
+        </div>
       </div>
     </section>
 
     <!-- ===== Metrics ===== -->
-    <section class="metrics section-dark">
-      <div class="container metrics-grid">
-        <div class="metric reveal">
-          <span class="metric-num"><span data-count="60">0</span>+</span>
-          <span class="metric-label">Brands worldwide</span>
+    <section class="metrics">
+      <div class="metrics-grid">
+        <div class="metric" data-reveal>
+          <div class="metric-num"><span data-count="40" data-suffix="+">40+</span></div>
+          <div class="metric-label">Brands worldwide</div>
         </div>
-        <div class="metric reveal">
-          <span class="metric-num"><span data-count="98.5" data-decimals="1">0</span>%</span>
-          <span class="metric-label">Client acquisition</span>
+        <div class="metric" data-reveal data-delay="80">
+          <div class="metric-num metric-num-accent"><span data-count="98.5" data-suffix="%" data-decimals="1">98.5%</span></div>
+          <div class="metric-label">Client acquisition</div>
         </div>
-        <div class="metric reveal">
-          <span class="metric-num"><span data-count="4">0</span>+</span>
-          <span class="metric-label">Years architecting</span>
+        <div class="metric" data-reveal data-delay="160">
+          <div class="metric-num"><span data-count="6" data-suffix="+">6+</span></div>
+          <div class="metric-label">Years architecting</div>
         </div>
-        <div class="metric reveal">
-          <span class="metric-num"><span data-count="120">0</span>+</span>
-          <span class="metric-label">Projects delivered</span>
+        <div class="metric" data-reveal data-delay="240">
+          <div class="metric-num"><span data-count="120" data-suffix="+">120+</span></div>
+          <div class="metric-label">Projects delivered</div>
         </div>
       </div>
     </section>
 
     <!-- ===== Work ===== -->
-    <section class="work section" id="work">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="dot"></span>Selected work</p>
-          <h2 class="section-title">Built for structure,<br>measured in growth</h2>
+    <section class="section" id="work">
+      <div class="section-head" data-reveal>
+        <div class="eyebrow">
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          <span class="eyebrow-text">Selected work</span>
         </div>
+        <h2 class="section-title">Built for structure, measured in growth</h2>
+      </div>
 
-        <div class="work-grid">
-          <a class="work-card reveal" href="https://picsly.netlify.app" target="_blank" rel="noopener noreferrer">
-            <div class="work-visual wv-mesh" aria-hidden="true"><span class="wv-dot"></span></div>
-            <div class="work-meta">
-              <h3>Picsly<span class="work-go" aria-hidden="true">↗</span></h3>
-              <p>Browser-native image compression</p>
-              <span class="work-stat">0 uploads · 100% on-device</span>
+      <a class="work-feature" href="https://picsly.netlify.app" target="_blank" rel="noopener" data-reveal data-magnet="4">
+        <div class="work-feature-grid">
+          <div class="work-feature-body">
+            <div class="tag-live">
+              <span class="tag-live-dot" aria-hidden="true"></span>
+              <span>Live product</span>
             </div>
-          </a>
-          <article class="work-card reveal">
-            <div class="work-visual wv-rings" aria-hidden="true"><span class="wv-dot"></span></div>
-            <div class="work-meta">
-              <h3>QuantumWeb</h3>
-              <p>Brand system &amp; marketing site</p>
-              <span class="work-stat">2.4s → 0.8s load time</span>
+            <h3>Picsly</h3>
+            <p>Browser-native image compression. Nothing leaves the device — the whole pipeline runs client-side.</p>
+            <div class="work-stats">
+              <div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">uploads</div>
+              </div>
+              <div>
+                <div class="stat-value stat-value-accent">100%</div>
+                <div class="stat-label">on-device</div>
+              </div>
             </div>
-          </article>
-          <article class="work-card reveal">
-            <div class="work-visual wv-cols" aria-hidden="true"><span class="wv-dot"></span></div>
-            <div class="work-meta">
-              <h3>Vantive</h3>
-              <p>E-commerce architecture</p>
-              <span class="work-stat">+38% checkout conversion</span>
-            </div>
-          </article>
+            <div class="work-cta">Visit picsly<span class="btn-glyph" aria-hidden="true">↗</span></div>
+          </div>
+          <div class="work-visual">
+            <canvas class="work-canvas" aria-hidden="true"></canvas>
+            <div class="work-hint" aria-hidden="true">Drag your cursor through it</div>
+          </div>
+        </div>
+      </a>
+
+      <div class="grid-2 work-mini-grid">
+        <div class="work-mini" data-reveal data-magnet="5">
+          <h3>QuantumWeb</h3>
+          <p>Brand system &amp; marketing site</p>
+          <div class="mini-metric">
+            <span class="strike">2.4s</span>
+            <span class="arrow-muted" aria-hidden="true">→</span>
+            <span class="big-accent">0.8s</span>
+            <span class="mini-label">load time</span>
+          </div>
+        </div>
+        <div class="work-mini" data-reveal data-delay="90" data-magnet="5">
+          <h3>Vantive</h3>
+          <p>E-commerce architecture</p>
+          <div class="mini-metric">
+            <span class="big-accent">+38%</span>
+            <span class="mini-label">checkout conversion</span>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ===== Process ===== -->
-    <section class="process section" id="process">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow"><span class="dot"></span>How we work</p>
-          <h2 class="section-title">From first call<br>to shipped reality</h2>
+    <section class="process" id="process">
+      <div class="process-inner">
+        <div class="section-head section-head-wide" data-reveal>
+          <div class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            <span class="eyebrow-text">How we work</span>
+          </div>
+          <h2 class="section-title">From first call to shipped reality</h2>
         </div>
 
-        <ol class="process-grid">
-          <li class="process-step reveal">
-            <div class="step-inner">
-              <span class="step-num">01</span>
+        <div class="process-list">
+          <div class="process-line" aria-hidden="true"></div>
+          <div class="process-progress" aria-hidden="true"></div>
+
+          <div class="process-step" data-reveal>
+            <div class="step-num">01</div>
+            <div class="step-body">
               <h3>Discover</h3>
               <p>We map your market, your customers, and what your digital presence has to do for the business.</p>
             </div>
-          </li>
-          <li class="process-step reveal">
-            <div class="step-inner">
-              <span class="step-num">02</span>
+          </div>
+          <div class="process-step" data-reveal>
+            <div class="step-num">02</div>
+            <div class="step-body">
               <h3>Architect</h3>
               <p>Structure before surface. Information architecture, technical stack, and conversion paths — decided on paper first.</p>
             </div>
-          </li>
-          <li class="process-step reveal">
-            <div class="step-inner">
-              <span class="step-num">03</span>
+          </div>
+          <div class="process-step" data-reveal>
+            <div class="step-num">03</div>
+            <div class="step-body">
               <h3>Build</h3>
               <p>Design and engineering in one room. You see working software weekly, not a big reveal at the end.</p>
             </div>
-          </li>
-          <li class="process-step reveal">
-            <div class="step-inner">
-              <span class="step-num">04</span>
+          </div>
+          <div class="process-step" data-reveal>
+            <div class="step-num">04</div>
+            <div class="step-body">
               <h3>Scale</h3>
               <p>Launch is the starting line. We measure, tune, and grow what we shipped alongside your team.</p>
             </div>
-          </li>
-        </ol>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ===== CTA ===== -->
-    <section class="cta section-dark" id="contact">
-      <canvas class="cta-dots" aria-hidden="true"></canvas>
-      <div class="container cta-inner">
-        <p class="eyebrow eyebrow-light reveal"><span class="dot"></span>Next project</p>
-        <h2 class="cta-title reveal">Your digital reality<br>is next<span class="title-dot" aria-hidden="true"></span></h2>
-        <div class="cta-actions reveal">
-          <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-green magnetic">Start a project</a>
+    <section class="cta" id="contact">
+      <canvas class="cta-canvas" aria-hidden="true"></canvas>
+      <div class="cta-inner">
+        <div class="eyebrow eyebrow-center" data-reveal>
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          <span class="eyebrow-text">Next project</span>
+        </div>
+        <h2 class="cta-title" data-reveal data-delay="80">Your digital reality is next</h2>
+        <p class="cta-lede" data-reveal data-delay="160">Tell us what you're building. We'll tell you how we'd structure it.</p>
+        <div class="cta-actions" data-reveal data-delay="240">
+          <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-primary btn-xl" data-magnet="7">Start a project<span class="btn-glyph" aria-hidden="true">→</span></a>
+          <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener" class="btn btn-secondary btn-xl" data-magnet="7">See us on LinkedIn</a>
         </div>
       </div>
     </section>
@@ -331,44 +336,48 @@
 
   <!-- ===== Footer ===== -->
   <footer class="site-footer">
-    <div class="container footer-grid">
-      <div class="footer-brand">
-        <a class="logo logo-invert" href="#top" aria-label="Back to top">
-          <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="logo-ring" cx="50" cy="50" r="36" pathLength="100"/>
-            <circle class="logo-dot" cx="78" cy="21" r="12"/>
-          </svg>
-          <span class="logo-word">Novaryn</span>
-        </a>
-        <p>High-performance digital architectures, built for structure, speed, and conversion.</p>
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="#top">
+            <img src="assets/logo-mark.png" alt="Novaryn" width="24" height="24">
+            <span class="logo-word logo-word-sm">Novaryn</span>
+          </a>
+          <p>High-performance digital architectures, built for structure, speed, and conversion.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Site</div>
+          <nav class="footer-links" aria-label="Site">
+            <a href="#top">Home</a>
+            <a href="#services">Services</a>
+            <a href="#work">Work</a>
+            <a href="#process">Process</a>
+          </nav>
+        </div>
+        <div>
+          <div class="footer-col-title">Social</div>
+          <nav class="footer-links" aria-label="Social">
+            <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="#">Instagram</a>
+            <a href="#">X / Twitter</a>
+            <a href="#">Dribbble</a>
+          </nav>
+        </div>
+        <div>
+          <div class="footer-col-title">Contact</div>
+          <div class="footer-links">
+            <a href="https://wa.me/923207203369" target="_blank" rel="noopener">+92 320 7203369</a>
+            <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">linkedin.com/novarynstudios</a>
+          </div>
+        </div>
       </div>
-      <nav class="footer-col" aria-label="Site">
-        <h4>Site</h4>
-        <a href="#top">Home</a>
-        <a href="#services">Services</a>
-        <a href="#work">Work</a>
-        <a href="#process">Process</a>
-      </nav>
-      <nav class="footer-col" aria-label="Social">
-        <h4>Social</h4>
-        <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="#">Instagram</a>
-        <a href="#">X / Twitter</a>
-        <a href="#">Dribbble</a>
-      </nav>
-      <div class="footer-col">
-        <h4>Contact</h4>
-        <a href="https://wa.me/923207203369" target="_blank" rel="noopener">+92 320 7203369</a>
-        <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">linkedin.com/novarynstudios</a>
+      <div class="footer-base">
+        <span class="footer-copy">© 2026 Novaryn. All rights reserved.</span>
+        <span class="footer-tag">Architecting your digital reality</span>
       </div>
-    </div>
-    <div class="container footer-base">
-      <span>© 2026 Novaryn. All rights reserved.</span>
-      <span>Architecting your digital reality<span class="dot dot-inline"></span></span>
     </div>
   </footer>
 
-  <script src="js/main.js?v=28"></script>
+  <script src="js/main.js?v=1"></script>
 </body>
 </html>
-<!-- ci test Fri Jul 24 17:04:30 PKT 2026 -->
