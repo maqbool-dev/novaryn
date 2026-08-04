@@ -1,601 +1,640 @@
-/* NOVARYN — interactions */
+/* =============================================================================
+   Novaryn — interactions
+
+   Ported from the Claude Design component. Four canvas systems:
+     field()   — drifting particle field with cursor repulsion (hero + CTA)
+     mesh()    — deterministic blob-graph in the Picsly card
+     orbital() — concentric orbits in the hero figure
+   plus scroll reveals, magnetic hover, count-up stats, and the process rail.
+   ============================================================================= */
+
 (() => {
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  "use strict";
 
-  /* ---------- Load sequence ---------- */
-  const start = () => {
-    document.body.classList.add("is-loaded");
-    const delay = reduceMotion ? 0 : 1300;
-    setTimeout(() => {
-      document.querySelectorAll(".stat-band, .hero-bracket").forEach((el) => el.classList.add("is-in"));
-    }, delay);
+  /* Design-component props, resolved once at their defaults. */
+  const CONFIG = {
+    accent: "#017346",
+    particleDensity: 1,
+    motionSpeed: 1,
+    magneticHover: true,
+    scrollReveal: true
   };
-  if (reduceMotion) {
-    start();
-  } else if (document.readyState === "complete") {
-    // hold the curtain long enough for one full orbit of the dot
-    setTimeout(start, 700);
-  } else {
-    window.addEventListener("load", () => setTimeout(start, 700));
-    // safety: never leave the curtain up
-    setTimeout(start, 3000);
-  }
 
-  /* ---------- Theme toggle ---------- */
-  /* the initial theme is resolved by the inline script in <head> so the first
-     paint is already correct; this only handles switching + persistence */
-  const themeBtn = document.querySelector(".theme-toggle");
-  const root = document.documentElement;
-  const syncThemeBtn = () => {
-    const dark = root.dataset.theme === "dark";
-    // keep the mobile browser chrome matching the page background
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", dark ? "#0c0c0b" : "#f2f2ef");
-    if (!themeBtn) return;
-    themeBtn.setAttribute("aria-pressed", String(dark));
-    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SPEED = CONFIG.motionSpeed * (reduce ? 0.25 : 1);
+
+  const hexRgb = (h) => {
+    const s = h.replace("#", "");
+    const v = s.length === 3 ? s.split("").map((c) => c + c).join("") : s;
+    const n = parseInt(v, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   };
-  syncThemeBtn();
-  if (themeBtn) {
-    themeBtn.addEventListener("click", () => {
-      const goDark = root.dataset.theme !== "dark";
-      // crossfade the palette, then drop the class so nothing keeps transitioning
-      root.classList.add("theme-swap");
-      if (goDark) root.dataset.theme = "dark";
-      else delete root.dataset.theme;
-      try { localStorage.setItem("novaryn-theme", goDark ? "dark" : "light"); } catch (e) { /* private mode */ }
-      syncThemeBtn();
-      document.dispatchEvent(new CustomEvent("themechange"));
-      setTimeout(() => root.classList.remove("theme-swap"), 420);
-    });
-  }
-  // follow the OS while the visitor hasn't made an explicit choice
-  const osDark = window.matchMedia("(prefers-color-scheme: dark)");
-  osDark.addEventListener("change", (e) => {
-    let saved = null;
-    try { saved = localStorage.getItem("novaryn-theme"); } catch (err) { /* ignore */ }
-    if (saved) return;
-    if (e.matches) root.dataset.theme = "dark";
-    else delete root.dataset.theme;
-    syncThemeBtn();
-    document.dispatchEvent(new CustomEvent("themechange"));
-  });
 
-  /* ---------- Logo dot orbit (always completes the full loop) ---------- */
-  document.querySelectorAll(".logo").forEach((logo) => {
-    const dot = logo.querySelector(".logo-dot");
-    if (!dot) return;
-    logo.addEventListener("mouseenter", () => {
-      if (reduceMotion) return;
-      dot.classList.add("is-orbiting");
-    });
-    dot.addEventListener("animationend", () => dot.classList.remove("is-orbiting"));
-  });
+  const ACCENT = hexRgb(CONFIG.accent);
+  const rgba = (a) => "rgba(" + ACCENT[0] + "," + ACCENT[1] + "," + ACCENT[2] + "," + a + ")";
+  const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
 
-  /* ---------- Header state ---------- */
-  const header = document.querySelector(".site-header");
-  const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 24);
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  /* ===========================================================================
+     Particle field — hero and CTA backdrops
+     =========================================================================== */
 
-  /* ---------- Mobile menu ---------- */
-  const toggle = document.querySelector(".nav-toggle");
-  const menu = document.querySelector(".mobile-menu");
-  const setMenu = (open) => {
-    toggle.setAttribute("aria-expanded", open);
-    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-    menu.classList.toggle("is-open", open);
-    menu.setAttribute("aria-hidden", !open);
-    document.body.style.overflow = open ? "hidden" : "";
-  };
-  toggle.addEventListener("click", () => setMenu(toggle.getAttribute("aria-expanded") !== "true"));
-  menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
-
-  /* ---------- Nav underline sweeps with the cursor's direction ---------- */
-  document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
-    const setDir = (e) => {
-      const r = link.getBoundingClientRect();
-      link.classList.toggle("from-right", e.clientX > r.left + r.width / 2);
-    };
-    link.addEventListener("mouseenter", setDir);
-    link.addEventListener("mouseleave", setDir);
-  });
-
-  /* ---------- Scroll reveals (staggered per section) ---------- */
-  const revealEls = document.querySelectorAll(".reveal");
-  revealEls.forEach((el) => {
-    const siblings = el.parentElement.querySelectorAll(":scope > .reveal");
-    const i = Array.from(siblings).indexOf(el);
-    if (i > 0) el.style.setProperty("--d", `${Math.min(i * 0.12, 0.5)}s`);
-  });
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.18, rootMargin: "0px 0px -6% 0px" }
-  );
-  revealEls.forEach((el) => revealObserver.observe(el));
-
-  /* ---------- Counters ---------- */
-  const animateCount = (el) => {
-    const target = parseFloat(el.dataset.count);
-    const decimals = parseInt(el.dataset.decimals || "0", 10);
-    const suffix = el.dataset.suffix || "";
-    const duration = 1600;
-    const t0 = performance.now();
-    const tick = (now) => {
-      const p = Math.min((now - t0) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = (target * eased).toFixed(decimals) + suffix;
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  };
-  const countObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (reduceMotion) {
-            const el = entry.target;
-            el.textContent = parseFloat(el.dataset.count).toFixed(parseInt(el.dataset.decimals || "0", 10)) + (el.dataset.suffix || "");
-          } else {
-            // hero counters wait for the load curtain to lift so the count-up is seen
-            const delay = entry.target.closest(".hero") ? 1250 : 0;
-            const el = entry.target;
-            el.textContent = "0";
-            setTimeout(() => animateCount(el), delay);
-          }
-          countObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.6 }
-  );
-  document.querySelectorAll("[data-count]").forEach((el) => countObserver.observe(el));
-
-  /* ---------- Magnetic buttons ---------- */
-  if (!reduceMotion && matchMedia("(pointer: fine)").matches) {
-    document.querySelectorAll(".magnetic").forEach((btn) => {
-      const strength = 6;
-      btn.addEventListener("mousemove", (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
-        const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-        btn.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
-      });
-      btn.addEventListener("mouseleave", () => {
-        btn.style.transform = "";
-      });
-    });
-  }
-
-  /* ---------- CTA dot grid lights up around the cursor ---------- */
-  const cta = document.querySelector(".cta");
-  const ctaCanvas = cta && cta.querySelector(".cta-dots");
-  if (ctaCanvas && !reduceMotion && matchMedia("(pointer: fine)").matches) {
-    const dctx = ctaCanvas.getContext("2d");
-    const base = document.createElement("canvas");   // static grid, blitted each frame
-    const GAP = 26;                                  // grid spacing
-    const REACH = 175;                               // glow radius
-    const readGreen = () =>
-      (getComputedStyle(root).getPropertyValue("--dot-rgb") || "18, 161, 94").trim();
-    let GREEN = readGreen();                         // tracks the active theme
-    let dpr = 1, cw = 0, ch = 0;
-    let mx = -9999, my = -9999;                      // eased glow centre
-    let tx = -9999, ty = -9999;                      // cursor target
-    let lit = 0, wantLit = 0;                        // halo fade in/out
-    let dotsRaf = null;
-
-    const buildDots = () => {
-      const r = cta.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cw = Math.round(r.width);
-      ch = Math.round(r.height);
-      ctaCanvas.width = base.width = cw * dpr;
-      ctaCanvas.height = base.height = ch * dpr;
-      dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const bctx = base.getContext("2d");
-      bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      GREEN = readGreen();
-      bctx.fillStyle = `rgba(${GREEN}, 0.1)`;        // resting grid, barely there
-      for (let y = GAP / 2; y < ch; y += GAP) {
-        for (let x = GAP / 2; x < cw; x += GAP) {
-          bctx.beginPath();
-          bctx.arc(x, y, 1, 0, 6.2832);
-          bctx.fill();
-        }
-      }
-    };
-
-    const drawDots = () => {
-      dotsRaf = null;
-      mx += (tx - mx) * 0.12;                        // ease toward the cursor
-      my += (ty - my) * 0.12;
-      lit += (wantLit - lit) * 0.09;
-      dctx.clearRect(0, 0, cw, ch);
-      dctx.drawImage(base, 0, 0, cw, ch);
-      // only the dots inside the glow radius get repainted brighter/bigger
-      if (lit > 0.01) {
-        const iMin = Math.max(0, Math.floor((mx - REACH) / GAP));
-        const jMin = Math.max(0, Math.floor((my - REACH) / GAP));
-        const iMax = Math.ceil((mx + REACH) / GAP);
-        const jMax = Math.ceil((my + REACH) / GAP);
-        for (let j = jMin; j <= jMax; j++) {
-          const y = GAP / 2 + j * GAP;
-          if (y >= ch) break;
-          for (let i = iMin; i <= iMax; i++) {
-            const x = GAP / 2 + i * GAP;
-            if (x >= cw) break;
-            const d = Math.hypot(x - mx, y - my);
-            if (d >= REACH) continue;
-            const f = 1 - d / REACH;
-            const glow = f * f * lit;                // squared falloff = soft edge
-            if (glow < 0.01) continue;
-            dctx.beginPath();
-            dctx.arc(x, y, 1 + glow * 1.2, 0, 6.2832);
-            dctx.fillStyle = `rgba(${GREEN}, ${(0.1 + glow * 0.7).toFixed(3)})`;
-            dctx.fill();
-          }
-        }
-      }
-      const settled =
-        Math.abs(tx - mx) < 0.4 && Math.abs(ty - my) < 0.4 && Math.abs(wantLit - lit) < 0.005;
-      if (!settled) queueDots();
-    };
-
-    const queueDots = () => {
-      if (dotsRaf || document.hidden) return;
-      dotsRaf = requestAnimationFrame(drawDots);
-    };
-
-    cta.addEventListener("mousemove", (e) => {
-      const r = cta.getBoundingClientRect();
-      tx = e.clientX - r.left;
-      ty = e.clientY - r.top;
-      if (mx < -1000) { mx = tx; my = ty; }          // first entry: no long sweep in
-      wantLit = 1;
-      queueDots();
-    });
-    cta.addEventListener("mouseleave", () => { wantLit = 0; queueDots(); });
-
-    buildDots();
-    drawDots();                                       // paint the resting grid
-    let dotsResizeT = null;
-    window.addEventListener("resize", () => {
-      clearTimeout(dotsResizeT);
-      dotsResizeT = setTimeout(() => { buildDots(); drawDots(); }, 150);
-    });
-    document.addEventListener("themechange", () => { buildDots(); drawDots(); });
-  }
-
-  /* ---------- Stat band / bracket alignment ---------- */
-  const band = document.querySelector(".stat-band");
-  const bracket = document.querySelector(".hero-bracket");
-  const statBlock = document.querySelector(".stat-block");
-  const hero = document.querySelector(".hero");
-  const alignBand = () => {
-    if (!band || !statBlock) return;
-    const heroRect = hero.getBoundingClientRect();
-    const statRect = statBlock.getBoundingClientRect();
-    const top = statRect.top - heroRect.top;
-    band.style.top = `${top}px`;
-    band.style.height = `${statRect.height}px`;
-    if (bracket) {
-      const bTop = heroRect.height * 0.265;
-      bracket.style.height = `${Math.max(top + 24 - bTop, 40)}px`;
-    }
-  };
-  alignBand();
-  window.addEventListener("resize", alignBand);
-  window.addEventListener("load", alignBand);
-
-  /* ---------- Hero parallax: the portrait trails the headline ---------- */
-  /* shared with the morph scene below so the particle hand-off lines up exactly */
-  let heroParallax = 0;
-  const heroSubjectEl = document.querySelector(".hero .subject");
-  if (heroSubjectEl && !reduceMotion) {
-    const FACTOR = 0.18;     // portrait scrolls 18% slower than the copy
-    const MAX = 120;
-    let parallaxRaf = null;
-    const applyParallax = () => {
-      parallaxRaf = null;
-      heroParallax = Math.min(window.scrollY * FACTOR, MAX);
-      // `translate` composes with the load-in `transform` instead of replacing it
-      heroSubjectEl.style.translate = `0 ${heroParallax.toFixed(1)}px`;
-    };
-    const queueParallax = () => {
-      if (document.hidden) { applyParallax(); return; }
-      if (parallaxRaf) return;
-      parallaxRaf = requestAnimationFrame(applyParallax);
-    };
-    applyParallax();
-    window.addEventListener("scroll", queueParallax, { passive: true });
-  }
-
-  /* ---------- Morph scene: subject dissolves to particles, reforms in profile ---------- */
-  const morph = document.querySelector(".morph");
-  if (morph && !reduceMotion) {
-    const canvas = morph.querySelector(".morph-canvas");
-    const morphHead = morph.querySelector(".morph-head");
-    const morphImgB = morph.querySelector(".morph-img-b");
-    const heroFigure = document.querySelector(".hero-figure");
-    const heroSubject = document.querySelector(".hero .subject");
+  function field(canvas, opt) {
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    let pairs = [];
-    let startY = 40;
-    let endY = 1;
-    let unpinY = 1;
-    let targetP = 0;
-    let shownP = -1;
-    let rafOn = false;
+    const state = {
+      w: 0, h: 0, parts: [], mx: -9999, my: -9999,
+      active: false, t: Math.random() * 1000, raf: 0, vis: true
+    };
 
-    const samplePoints = (img, w, h, stride, offsetX, offsetY) => {
-      const off = document.createElement("canvas");
-      off.width = w;
-      off.height = h;
-      const octx = off.getContext("2d", { willReadFrequently: true });
-      octx.drawImage(img, 0, 0, w, h);
-      const data = octx.getImageData(0, 0, w, h).data;
-      const pts = [];
-      for (let y = 0; y < h; y += stride) {
-        for (let x = 0; x < w; x += stride) {
-          const i = (y * w + x) * 4;
-          if (data[i + 3] > 128) {
-            pts.push({ x: offsetX + x, y: offsetY + y, c: `rgb(${data[i]},${data[i + 1]},${data[i + 2]})` });
+    const resize = () => {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const d = dpr();
+      state.w = r.width;
+      state.h = r.height;
+      canvas.width = Math.round(r.width * d);
+      canvas.height = Math.round(r.height * d);
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+
+      const target = Math.max(24, Math.min(280, Math.round(r.width * r.height * opt.density)));
+      const p = state.parts;
+      while (p.length > target) p.pop();
+      while (p.length < target) {
+        p.push({
+          x: Math.random() * r.width,
+          y: Math.random() * r.height,
+          vx: 0, vy: 0,
+          ph: Math.random() * Math.PI * 2,
+          r: opt.dot[0] + Math.random() * (opt.dot[1] - opt.dot[0]),
+          e: 0
+        });
+      }
+    };
+    resize();
+    new ResizeObserver(resize).observe(canvas);
+    new IntersectionObserver((es) => { state.vis = es[0].isIntersecting; }, { threshold: 0 }).observe(canvas);
+
+    const onMove = (e) => {
+      const r = canvas.getBoundingClientRect();
+      state.mx = e.clientX - r.left;
+      state.my = e.clientY - r.top;
+      state.active = state.mx > -80 && state.my > -80 &&
+                     state.mx < r.width + 80 && state.my < r.height + 80;
+    };
+    const onLeave = () => { state.active = false; state.mx = -9999; state.my = -9999; };
+
+    /* Click shoves nearby particles outward, then friction reels them back. */
+    const onDown = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const cx = e.clientX - r.left;
+      const cy = e.clientY - r.top;
+      if (cx < 0 || cy < 0 || cx > r.width || cy > r.height) return;
+      state.parts.forEach((p) => {
+        const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy) || 1;
+        if (d < 260) {
+          const f = (1 - d / 260) * 7;
+          p.vx += (dx / d) * f;
+          p.vy += (dy / d) * f;
+          p.e = 1;
+        }
+      });
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("blur", onLeave);
+
+    const draw = () => {
+      state.raf = requestAnimationFrame(draw);
+      if (!state.vis || !state.w) return;
+      state.t += 0.0022 * SPEED;
+
+      const p = state.parts, n = p.length, C = opt.connect;
+      ctx.clearRect(0, 0, state.w, state.h);
+
+      for (let i = 0; i < n; i++) {
+        const a = p[i];
+        const ang = Math.sin(a.x * 0.0035 + state.t) * 1.7 +
+                    Math.cos(a.y * 0.0031 - state.t * 1.3) * 1.7 +
+                    a.ph * 0.15;
+        a.vx += Math.cos(ang) * 0.035 * SPEED;
+        a.vy += Math.sin(ang) * 0.035 * SPEED;
+
+        if (opt.interactive && state.active) {
+          const dx = a.x - state.mx, dy = a.y - state.my, d2 = dx * dx + dy * dy;
+          const R = 150;
+          if (d2 < R * R) {
+            const d = Math.sqrt(d2) || 1, f = 1 - d / R;
+            a.vx += (dx / d) * f * 1.05;
+            a.vy += (dy / d) * f * 1.05;
+            a.e = Math.max(a.e, f);
           }
         }
-      }
-      return pts;
-    };
 
-    const shuffle = (arr) => {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+        a.e *= 0.94;
+        a.vx *= 0.955;
+        a.vy *= 0.955;
+        const sp = Math.hypot(a.vx, a.vy);
+        if (sp > 3.2) { a.vx = a.vx / sp * 3.2; a.vy = a.vy / sp * 3.2; }
+        a.x += a.vx;
+        a.y += a.vy;
+        if (a.x < -20) a.x = state.w + 20; else if (a.x > state.w + 20) a.x = -20;
+        if (a.y < -20) a.y = state.h + 20; else if (a.y > state.h + 20) a.y = -20;
       }
-      return arr;
-    };
 
-    const build = (imgA, imgB) => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const narrow = w <= 1100;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // A = the hero subject's box in DOCUMENT coords, so particles start glued
-      // to the real hero figure and travel with it as it scrolls. offsetWidth
-      // ignores the img's load-in transform; on mobile the figure wrapper is
-      // full-width with the img centered inside, so centre within its rect.
-      const figRect = heroFigure.getBoundingClientRect();
-      const subjW = heroSubject.offsetWidth || Math.round(figRect.width) || 500;
-      const aX = figRect.left + (figRect.width - subjW) / 2;
-      const aY = figRect.top + window.scrollY;
-      // B = the profile's resting spot in VIEWPORT coords (stage is pinned
-      // there): left of centre on desktop, centred and nudged down on mobile
-      // so it clears the section copy at the top of the stage
-      const bX = narrow ? Math.max((w - subjW) / 2, 8) : w * 0.1;
-      const bYExtra = narrow ? h * 0.08 : 0;
-      // pin the crisp profile img to the exact box the particles converge on,
-      // so the end-of-morph crossfade never shifts position or size
-      const subjHB = Math.round(subjW * (imgB.naturalHeight / imgB.naturalWidth));
-      morphImgB.style.width = `${subjW}px`;
-      morphImgB.style.left = `${bX}px`;
-      morphImgB.style.top = `${(h - subjHB) / 2 + bYExtra}px`;
-      morphImgB.style.transform = "none";
-      // particle budget scales with viewport so phones stay smooth
-      const budget = w < 720 ? 2200 : narrow ? 3200 : 4500;
-      const ampScale = Math.max(0.55, Math.min(w / 1200, 1));
-      let stride = Math.max(3, Math.round(Math.sqrt((subjW * subjW * 0.45) / budget)));
-      const make = (img, ox, oy, centerB) => {
-        const subjH = Math.round(subjW * (img.naturalHeight / img.naturalWidth));
-        return samplePoints(img, subjW, subjH, stride, ox, centerB ? (h - subjH) / 2 + bYExtra : oy);
-      };
-      let a = make(imgA, aX, aY, false);
-      let b = make(imgB, bX, 0, true);
-      while (Math.max(a.length, b.length) > budget * 1.45 && stride < 12) {
-        stride++;
-        a = make(imgA, aX, aY, false);
-        b = make(imgB, bX, 0, true);
-      }
-      shuffle(a);
-      shuffle(b);
-      // pair 1:1, wrapping the shorter set so every particle has a partner
-      const n = Math.max(a.length, b.length);
-      pairs = new Array(n);
+      /* Links between neighbours — accent-tinted where the cursor has passed. */
+      ctx.lineWidth = 1;
       for (let i = 0; i < n; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        pairs[i] = {
-          a: a[i % a.length],
-          b: b[i % b.length],
-          dx: Math.cos(theta),
-          dy: Math.sin(theta),
-          amp: (40 + Math.random() * 110) * ampScale,
-          size: 1.5 + Math.random() * 1.5,
-        };
+        const a = p[i];
+        for (let j = i + 1; j < n; j++) {
+          const b = p[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          if (dx > C || dx < -C || dy > C || dy < -C) continue;
+          const d = Math.hypot(dx, dy);
+          if (d > C) continue;
+          const t = 1 - d / C, e = Math.max(a.e, b.e);
+          ctx.strokeStyle = e > 0.06
+            ? rgba((t * 0.5 * e + t * 0.06).toFixed(3))
+            : "rgba(23,23,23," + (t * 0.1).toFixed(3) + ")";
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
       }
-      startY = 40;
-      // the scrub completes at ~72% of the pinned distance — the remaining
-      // scroll is dwell room so the eased animation finishes while the stage
-      // is still pinned, even on fast flings
-      const pinRange = Math.max(morph.offsetHeight - h, 1);
-      const pinTop = morph.getBoundingClientRect().top + window.scrollY;
-      unpinY = pinTop + pinRange;
-      endY = pinTop + pinRange * 0.72;
-      shownP = -1; // force a restyle on the next scrub
-    };
 
-    const draw = (p, scrollNow) => {
-      // smoothstep keeps particles near the hero early on, so the dissolve
-      // starts gently while the subject is still in view
-      const pe = p * p * (3 - 2 * p);
-      const scatter = Math.sin(p * Math.PI);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < pairs.length; i++) {
-        const pt = pairs[i];
-        // A rides the page scroll *and* the portrait's parallax offset, so the
-        // hand-off from photo to particles lines up exactly
-        const aYs = pt.a.y - scrollNow + heroParallax;
-        const x = pt.a.x + (pt.b.x - pt.a.x) * pe + pt.dx * pt.amp * scatter;
-        const y = aYs + (pt.b.y - aYs) * pe + pt.dy * pt.amp * scatter;
-        ctx.fillStyle = p < 0.5 ? pt.a.c : pt.b.c;
-        ctx.fillRect(x, y, pt.size, pt.size);
+      /* Spokes from the cursor to whatever is within reach. */
+      if (opt.interactive && state.active) {
+        ctx.strokeStyle = rgba(0.22);
+        for (let i = 0; i < n; i++) {
+          const a = p[i], d = Math.hypot(a.x - state.mx, a.y - state.my);
+          if (d < 130) {
+            ctx.globalAlpha = 1 - d / 130;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(state.mx, state.my);
+            ctx.stroke();
+          }
+        }
+        ctx.globalAlpha = 1;
       }
-    };
 
-    const applyState = (p, scrollNow) => {
-      // nothing to do while parked at either end — cheap early-out replaces
-      // the IntersectionObserver gate now that the scene starts at page top
-      const parked = p === shownP && (p === 0 || p === 1);
-      shownP = p;
-      if (parked) return;
-      if (p === 0) {
-        canvas.style.opacity = "0";
-        heroFigure.style.opacity = "";
-        morphHead.style.opacity = "0";
-        morph.classList.remove("morph-done");
-        return;
-      }
-      if (p === 1) {
-        canvas.style.opacity = "0";
-        heroFigure.style.opacity = "";
-        morphHead.style.opacity = "1";
-        morph.classList.add("morph-done");
-        return;
-      }
-      // hand-off: the real hero figure fades to the particle canvas over the
-      // first few percent of the scrub, and back again when scrolling up
-      const intro = Math.min(p / 0.05, 1);
-      canvas.style.opacity = intro.toFixed(3);
-      heroFigure.style.opacity = (1 - intro).toFixed(3);
-      morphHead.style.opacity = Math.min(Math.max((p - 0.55) / 0.3, 0), 1).toFixed(3);
-      morph.classList.remove("morph-done");
-      draw(p, scrollNow);
-    };
-
-    const computeTarget = () =>
-      Math.min(Math.max((window.scrollY - startY) / (endY - startY), 0), 1);
-
-    // anchor-link jumps (nav, "explore services") shouldn't be caught by the
-    // scroll hold below — let them snap straight through the scene instead
-    let snapUntil = 0;
-    document.querySelectorAll('a[href^="#"]').forEach((a) => {
-      a.addEventListener("click", () => { snapUntil = performance.now() + 1700; });
-    });
-
-    // shown progress eases toward the scroll target each frame, so the scene
-    // glides through wheel steps and touch flicks instead of jumping per event
-    const tick = () => {
-      targetP = computeTarget();
-      const snap = performance.now() < snapUntil;
-      const gap = targetP - shownP;
-      // if a fling outruns the dwell room, complete instantly the moment the
-      // stage would unpin — the figure is never carried away half-formed
-      const mustFinish = targetP === 1 && window.scrollY >= unpinY - 8;
-      // catch up faster on big jumps and on the final approach
-      const factor = targetP === 1 ? 0.45 : Math.abs(gap) > 0.2 ? 0.3 : 0.16;
-      const next =
-        snap || mustFinish || shownP < 0 || Math.abs(gap) < 0.001
-          ? targetP
-          : shownP + gap * factor;
-      applyState(next, window.scrollY);
-      if (shownP !== targetP) {
-        requestAnimationFrame(tick);
-      } else {
-        rafOn = false;
+      for (let i = 0; i < n; i++) {
+        const a = p[i];
+        const e = Math.min(1, a.e * 1.6);
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r * (1 + e * 0.7), 0, Math.PI * 2);
+        ctx.fillStyle = e > 0.05 ? rgba((0.35 + e * 0.6).toFixed(3)) : "rgba(64,64,64,0.42)";
+        ctx.fill();
       }
     };
-
-    const scrub = () => {
-      if (document.hidden) { // rAF is suspended while hidden — snap directly
-        applyState(computeTarget(), window.scrollY);
-        return;
-      }
-      if (rafOn) return;
-      rafOn = true;
-      requestAnimationFrame(tick);
-    };
-
-    const morphImgs = ["assets/subject-cutout.png", "assets/subject-profile.png"].map((src) => {
-      const im = new Image();
-      im.src = src;
-      return im;
-    });
-    // wait on load, not decode() — decode promises stall in background tabs
-    const imgReady = (im) =>
-      im.complete && im.naturalWidth
-        ? Promise.resolve()
-        : new Promise((res, rej) => {
-            im.addEventListener("load", res, { once: true });
-            im.addEventListener("error", rej, { once: true });
-          });
-    Promise.all(morphImgs.map(imgReady))
-      .then(() => {
-        build(morphImgs[0], morphImgs[1]);
-        morph.classList.add("is-canvas");
-        scrub();
-        // re-anchor whenever late-arriving layout (hero image, fonts, load)
-        // shifts the sections the particle coordinates were sampled against
-        let rebuildT = null;
-        const scheduleRebuild = () => {
-          clearTimeout(rebuildT);
-          rebuildT = setTimeout(() => {
-            build(morphImgs[0], morphImgs[1]);
-            scrub();
-          }, 120);
-        };
-        if (document.readyState === "complete") scheduleRebuild();
-        else window.addEventListener("load", scheduleRebuild);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleRebuild);
-        window.addEventListener("scroll", scrub, { passive: true });
-        let lastW = window.innerWidth;
-        let lastH = window.innerHeight;
-        window.addEventListener("resize", () => {
-          // ignore height-only wobble from mobile URL bars collapsing —
-          // rebuilding mid-scroll would make the scene jump
-          if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 140) return;
-          lastW = window.innerWidth;
-          lastH = window.innerHeight;
-          scheduleRebuild();
-        });
-      })
-      .catch(() => { /* image load failed — the static fallback img stays visible */ });
+    state.raf = requestAnimationFrame(draw);
   }
 
-  /* ---------- Service rows: wipe follows the cursor's entry/exit edge ---------- */
-  document.querySelectorAll(".service-row").forEach((row) => {
-    const setDir = (e) => {
-      const r = row.getBoundingClientRect();
-      row.classList.toggle("wipe-bottom", e.clientY > r.top + r.height / 2);
-    };
-    row.addEventListener("mouseenter", setDir);
-    row.addEventListener("mouseleave", setDir);
-  });
+  /* ===========================================================================
+     Blob mesh — the Picsly card visual
+     =========================================================================== */
 
-  /* ---------- Active nav link on scroll ---------- */
-  const sections = ["services", "work", "process", "contact"]
-    .map((id) => document.getElementById(id))
-    .filter(Boolean);
-  const navLinks = document.querySelectorAll(".main-nav .nav-link");
-  const setActive = (id) => {
-    navLinks.forEach((l) => l.classList.toggle("is-active", l.getAttribute("href") === `#${id}`));
-  };
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActive(entry.target.id);
+  function mesh(canvas) {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const st = { w: 0, h: 0, nodes: [], edges: [], mx: -9999, my: -9999, raf: 0, vis: true, t: 0, frames: 0 };
+
+    /* Seeded PRNG so the graph is identical on every load. */
+    const rnd = ((s) => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)(20260804);
+
+    const build = () => {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const d = dpr();
+      st.w = r.width;
+      st.h = r.height;
+      canvas.width = Math.round(r.width * d);
+      canvas.height = Math.round(r.height * d);
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+
+      const cx = r.width / 2, cy = r.height / 2;
+      const R = Math.min(r.width, r.height) * 0.42;
+      const N = 60, M = 24;
+      const nodes = [];
+
+      /* Rim: three summed sines give the outline its irregular, organic edge. */
+      for (let i = 0; i < N; i++) {
+        const th = (i / N) * Math.PI * 2;
+        const rad = R * (1 +
+          0.115 * Math.sin(th * 3 + 0.7) +
+          0.07 * Math.sin(th * 7 + 2.1) +
+          0.045 * Math.sin(th * 13 + 4.3));
+        nodes.push({ bx: cx + Math.cos(th) * rad, by: cy + Math.sin(th) * rad, x: 0, y: 0, vx: 0, vy: 0, e: 0, edge: true, th: th });
+      }
+      for (let i = 0; i < M; i++) {
+        const th = rnd() * Math.PI * 2, rad = R * (0.12 + rnd() * 0.72);
+        nodes.push({ bx: cx + Math.cos(th) * rad, by: cy + Math.sin(th) * rad, x: 0, y: 0, vx: 0, vy: 0, e: 0, edge: false, th: th });
+      }
+      nodes.forEach((n) => { n.x = n.bx; n.y = n.by; });
+
+      const edges = [];
+      for (let i = 0; i < N; i++) {
+        edges.push({ a: i, b: (i + 1) % N, w: 4.2, o: 0.72 });
+        edges.push({ a: i, b: (i + 2) % N, w: 1.5, o: 0.34 });
+        if (i % 2 === 0) edges.push({ a: i, b: (i + 4) % N, w: 1, o: 0.2 });
+      }
+      /* Interior nodes wire to their seven nearest neighbours. */
+      for (let i = N; i < N + M; i++) {
+        const dl = [];
+        for (let j = 0; j < N + M; j++) {
+          if (j === i) continue;
+          dl.push([Math.hypot(nodes[i].bx - nodes[j].bx, nodes[i].by - nodes[j].by), j]);
+        }
+        dl.sort((p, q) => p[0] - q[0]);
+        for (let k = 0; k < 7 && k < dl.length; k++) edges.push({ a: i, b: dl[k][1], w: 1.1, o: 0.3 });
+      }
+      for (let k = 0; k < 74; k++) {
+        const a = Math.floor(rnd() * N), b = Math.floor(rnd() * (N + M));
+        if (a !== b) edges.push({ a: a, b: b, w: 0.8, o: 0.17 });
+      }
+
+      st.nodes = nodes;
+      st.edges = edges;
+    };
+    build();
+    new ResizeObserver(build).observe(canvas);
+    new IntersectionObserver((es) => { st.vis = es[0].isIntersecting; }, { threshold: 0 }).observe(canvas);
+
+    const onMove = (e) => {
+      const r = canvas.getBoundingClientRect();
+      st.mx = e.clientX - r.left;
+      st.my = e.clientY - r.top;
+    };
+    const onDown = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const cx = e.clientX - r.left, cy = e.clientY - r.top;
+      if (cx < 0 || cy < 0 || cx > r.width || cy > r.height) return;
+      st.nodes.forEach((n) => {
+        const dx = n.x - cx, dy = n.y - cy, d = Math.hypot(dx, dy) || 1;
+        if (d < 240) {
+          const f = (1 - d / 240) * 9;
+          n.vx += (dx / d) * f;
+          n.vy += (dy / d) * f;
+          n.e = 1;
+        }
       });
-    },
-    { rootMargin: "-40% 0px -55% 0px" }
-  );
-  sections.forEach((s) => sectionObserver.observe(s));
-  window.addEventListener("scroll", () => {
-    if (window.scrollY < 300) setActive("top");
-  }, { passive: true });
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+
+    const draw = () => {
+      st.raf = requestAnimationFrame(draw);
+      if (!st.w) return;
+      /* Run the first ~90 frames even while offscreen so it settles before reveal. */
+      if (!st.vis && st.frames > 90) return;
+      st.frames++;
+      st.t += 0.012 * SPEED;
+
+      const n = st.nodes, E = st.edges;
+      ctx.clearRect(0, 0, st.w, st.h);
+
+      for (let i = 0; i < n.length; i++) {
+        const p = n[i];
+        const bx = p.bx + Math.sin(st.t * 0.8 + p.th * 2.3) * (p.edge ? 3.4 : 2);
+        const by = p.by + Math.cos(st.t * 0.7 + p.th * 1.9) * (p.edge ? 3.4 : 2);
+        p.vx += (bx - p.x) * 0.045;
+        p.vy += (by - p.y) * 0.045;
+
+        const dx = p.x - st.mx, dy = p.y - st.my, d = Math.hypot(dx, dy);
+        const R = 120;
+        if (d < R) {
+          const f = 1 - d / R;
+          p.vx += (dx / (d || 1)) * f * 2.2;
+          p.vy += (dy / (d || 1)) * f * 2.2;
+          p.e = Math.max(p.e, f);
+        }
+        p.e *= 0.94;
+        p.vx *= 0.9;
+        p.vy *= 0.9;
+        p.x += p.vx;
+        p.y += p.vy;
+      }
+
+      ctx.lineCap = "round";
+      for (let k = 0; k < E.length; k++) {
+        const e = E[k], a = n[e.a], b = n[e.b];
+        const act = Math.min(1, Math.max(a.e, b.e) * 1.6);
+        ctx.lineWidth = e.w * (1 + act * 0.5);
+        ctx.strokeStyle = act > 0.05
+          ? rgba(Math.min(0.95, e.o + act * 0.5).toFixed(3))
+          : "rgba(23,23,23," + e.o.toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < n.length; i++) {
+        const p = n[i];
+        const act = Math.min(1, p.e * 1.7);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (p.edge ? 2.4 : 1.8) * (1 + act * 0.9), 0, Math.PI * 2);
+        ctx.fillStyle = act > 0.05 ? rgba((0.5 + act * 0.5).toFixed(3)) : "rgba(23,23,23,0.7)";
+        ctx.fill();
+      }
+    };
+    st.raf = requestAnimationFrame(draw);
+  }
+
+  /* ===========================================================================
+     Orbits — the hero figure
+     =========================================================================== */
+
+  function orbital(canvas) {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const st = { w: 0, h: 0, nodes: [], mx: -9999, my: -9999, raf: 0, vis: true, t: 0 };
+
+    const build = () => {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width) return;
+      const d = dpr();
+      st.w = r.width;
+      st.h = r.height;
+      canvas.width = Math.round(r.width * d);
+      canvas.height = Math.round(r.height * d);
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+
+      const min = Math.min(r.width, r.height) / 2;
+      const orbits = [
+        { rad: min * 0.34, n: 6, spd: 0.16 },
+        { rad: min * 0.58, n: 11, spd: -0.1 },
+        { rad: min * 0.82, n: 16, spd: 0.06 },
+        { rad: min * 0.97, n: 9, spd: -0.035 }
+      ];
+      st.nodes = [];
+      orbits.forEach((o, oi) => {
+        for (let i = 0; i < o.n; i++) {
+          st.nodes.push({
+            rad: o.rad,
+            a: (i / o.n) * Math.PI * 2 + oi * 0.4,
+            spd: o.spd,
+            x: 0, y: 0, ox: 0, oy: 0, e: 0, ring: oi,
+            r: oi === 3 ? 1.6 : oi === 0 ? 3 : 2.1
+          });
+        }
+      });
+    };
+    build();
+    new ResizeObserver(build).observe(canvas);
+    new IntersectionObserver((es) => { st.vis = es[0].isIntersecting; }, { threshold: 0 }).observe(canvas);
+
+    const onMove = (e) => {
+      const r = canvas.getBoundingClientRect();
+      st.mx = e.clientX - r.left;
+      st.my = e.clientY - r.top;
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+
+    const draw = () => {
+      st.raf = requestAnimationFrame(draw);
+      if (!st.vis || !st.w) return;
+      st.t += 0.016 * SPEED;
+
+      const cx = st.w / 2, cy = st.h / 2, n = st.nodes;
+      ctx.clearRect(0, 0, st.w, st.h);
+
+      for (let i = 0; i < n.length; i++) {
+        const p = n[i];
+        p.a += p.spd * 0.006 * SPEED;
+        const wob = Math.sin(st.t * 0.9 + p.a * 2 + p.ring) * (p.ring === 3 ? 4 : 7);
+        const x = cx + Math.cos(p.a) * (p.rad + wob);
+        const y = cy + Math.sin(p.a) * (p.rad + wob);
+
+        /* Nodes get pushed off their orbit near the cursor, then ease back. */
+        const dx = x - st.mx, dy = y - st.my, d = Math.hypot(dx, dy);
+        const R = 140;
+        if (d < R) {
+          const f = 1 - d / R;
+          p.ox += ((dx / (d || 1)) * f * 38 - p.ox) * 0.14;
+          p.oy += ((dy / (d || 1)) * f * 38 - p.oy) * 0.14;
+          p.e = Math.max(p.e, f);
+        } else {
+          p.ox += (0 - p.ox) * 0.07;
+          p.oy += (0 - p.oy) * 0.07;
+        }
+        p.e *= 0.95;
+        p.x = x + p.ox;
+        p.y = y + p.oy;
+      }
+
+      ctx.lineWidth = 1;
+      for (let i = 0; i < n.length; i++) {
+        const a = n[i];
+        for (let j = i + 1; j < n.length; j++) {
+          const b = n[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          if (dx > 96 || dx < -96 || dy > 96 || dy < -96) continue;
+          const d = Math.hypot(dx, dy);
+          if (d > 96) continue;
+          const t = 1 - d / 96, e = Math.max(a.e, b.e);
+          ctx.strokeStyle = e > 0.06
+            ? rgba((t * 0.55 * e + t * 0.07).toFixed(3))
+            : "rgba(23,23,23," + (t * 0.13).toFixed(3) + ")";
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      for (let i = 0; i < n.length; i++) {
+        const p = n[i];
+        if (p.ring === 0) {
+          ctx.strokeStyle = rgba(0.16);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+        const e = Math.min(1, p.e * 1.7);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * (1 + e * 0.8), 0, Math.PI * 2);
+        ctx.fillStyle = e > 0.05
+          ? rgba((0.4 + e * 0.55).toFixed(3))
+          : (p.ring === 0 ? "rgba(1,115,70,0.55)" : "rgba(64,64,64,0.4)");
+        ctx.fill();
+      }
+    };
+    st.raf = requestAnimationFrame(draw);
+  }
+
+  /* ===========================================================================
+     Scroll reveals
+     =========================================================================== */
+
+  function reveals() {
+    const nodes = Array.from(document.querySelectorAll("[data-reveal]"));
+    if (!nodes.length) return;
+
+    if (CONFIG.scrollReveal === false || reduce) return;
+
+    nodes.forEach((n) => {
+      n.style.opacity = "0";
+      n.style.transform = "translate3d(0,22px,0)";
+      n.style.transition = "opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1)";
+      n.style.transitionDelay = parseInt(n.dataset.delay || "0", 10) + "ms";
+      n.style.willChange = "opacity, transform";
+    });
+
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.style.opacity = "1";
+        e.target.style.transform = "translate3d(0,0,0)";
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
+
+    nodes.forEach((n) => io.observe(n));
+  }
+
+  /* ===========================================================================
+     Magnetic hover
+     =========================================================================== */
+
+  function magnets() {
+    if (CONFIG.magneticHover === false || reduce) return;
+
+    document.querySelectorAll("[data-magnet]").forEach((el) => {
+      const amt = parseFloat(el.dataset.magnet) || 5;
+      const base = el.style.transform || "";
+      let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
+
+      const tick = () => {
+        raf = 0;
+        cx += (tx - cx) * 0.18;
+        cy += (ty - cy) * 0.18;
+        el.style.transform = base + " translate3d(" + cx.toFixed(2) + "px," + cy.toFixed(2) + "px,0)";
+        if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) raf = requestAnimationFrame(tick);
+      };
+      const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+
+      el.addEventListener("pointermove", (e) => {
+        const r = el.getBoundingClientRect();
+        tx = ((e.clientX - (r.left + r.width / 2)) / (r.width / 2)) * amt;
+        ty = ((e.clientY - (r.top + r.height / 2)) / (r.height / 2)) * amt;
+        kick();
+      });
+      el.addEventListener("pointerleave", () => { tx = 0; ty = 0; kick(); });
+    });
+  }
+
+  /* ===========================================================================
+     Count-up stats
+     =========================================================================== */
+
+  function counters() {
+    const nodes = Array.from(document.querySelectorAll("[data-count]"));
+    if (!nodes.length) return;
+
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        io.unobserve(el);
+
+        const target = parseFloat(el.dataset.count);
+        const dec = parseInt(el.dataset.decimals || "0", 10);
+        const suffix = el.dataset.suffix || "";
+
+        if (reduce) {
+          el.textContent = target.toFixed(dec) + suffix;
+          return;
+        }
+
+        const start = performance.now(), dur = 1400;
+        const step = (now) => {
+          const t = Math.min(1, (now - start) / dur);
+          const k = 1 - Math.pow(1 - t, 3);
+          el.textContent = (target * k).toFixed(dec) + suffix;
+          if (t < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.4 });
+
+    nodes.forEach((n) => io.observe(n));
+  }
+
+  /* ===========================================================================
+     Process rail — fills as the list scrolls past three-quarter height
+     =========================================================================== */
+
+  function progress() {
+    const wrap = document.querySelector(".process-list");
+    const bar = document.querySelector(".process-progress");
+    if (!wrap || !bar) return;
+
+    const onScroll = () => {
+      const r = wrap.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, (window.innerHeight * 0.75 - r.top) / (r.height || 1)));
+      bar.style.transform = "scaleY(" + p.toFixed(4) + ")";
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+  }
+
+  /* ===========================================================================
+     Mobile nav
+     =========================================================================== */
+
+  function mobileNav() {
+    const toggle = document.querySelector(".nav-toggle");
+    const menu = document.querySelector(".mobile-nav");
+    if (!toggle || !menu) return;
+
+    const setOpen = (open) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      menu.hidden = !open;
+    };
+
+    toggle.addEventListener("click", () => {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+    menu.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") setOpen(false);
+    });
+    /* Leaving the mobile breakpoint should not strand the panel open. */
+    window.matchMedia("(min-width: 901px)").addEventListener("change", (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+
+  /* ===========================================================================
+     Boot
+     =========================================================================== */
+
+  const init = () => {
+    const density = CONFIG.particleDensity;
+
+    field(document.querySelector(".hero-canvas"), {
+      density: 0.00016 * density, connect: 118, dot: [1.1, 2.6], interactive: true
+    });
+    field(document.querySelector(".cta-canvas"), {
+      density: 0.00009 * density, connect: 130, dot: [1, 2.4], interactive: true
+    });
+    mesh(document.querySelector(".work-canvas"));
+    orbital(document.querySelector(".figure-canvas"));
+
+    reveals();
+    magnets();
+    counters();
+    progress();
+    mobileNav();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
