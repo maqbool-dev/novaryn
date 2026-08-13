@@ -852,6 +852,14 @@ img, canvas { display: block; }
 
 .stat-value-accent { color: var(--brand-800); }
 
+.stat-unit {
+  margin-left: 2px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0;
+}
+
 .stat-label {
   margin-top: 4px;
   font-size: 13px;
@@ -895,6 +903,23 @@ img, canvas { display: block; }
   text-transform: uppercase;
   color: var(--text-disabled);
   pointer-events: none;
+}
+
+/* Second feature card: same chrome, flipped columns. Explicit placement rather
+   than row-reverse so the copy still comes first in the DOM (and on mobile,
+   where the media query clears the placement and it stacks copy-then-visual). */
+.work-feature-alt { margin-top: 20px; }
+
+.work-feature-alt .work-feature-body {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.work-feature-alt .work-visual {
+  grid-column: 1;
+  grid-row: 1;
+  border-left: 0;
+  border-right: 1px solid var(--border-secondary);
 }
 
 .work-mini-grid { margin-top: 20px; }
@@ -1199,12 +1224,21 @@ img, canvas { display: block; }
 
   .work-feature-body { padding: 32px; }
 
-  /* Stacked: the divider between copy and canvas turns horizontal. */
+  /* Stacked: the divider between copy and canvas turns horizontal. Clearing the
+     mirrored card's explicit placement lets both cards stack copy-first. */
   .work-visual {
     border-left: 0;
     border-top: 1px solid var(--border-secondary);
     min-height: 320px;
   }
+
+  .work-feature-alt .work-feature-body,
+  .work-feature-alt .work-visual {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .work-feature-alt .work-visual { border-right: 0; }
 
   /* Two-up metrics: the third cell starts a new row, so it loses its divider
      and the band gets symmetric padding instead of flush outer edges. */

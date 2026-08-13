@@ -622,7 +622,11 @@
     field(document.querySelector(".cta-canvas"), {
       density: 0.00009 * density, connect: 130, dot: [1, 2.4], interactive: true
     });
-    mesh(document.querySelector(".work-canvas"));
+    mesh(document.querySelector(".mesh-canvas"));
+    /* Holodeck's card: the field's points-and-links read like hand landmarks. */
+    field(document.querySelector(".holodeck-canvas"), {
+      density: 0.0003 * density, connect: 110, dot: [1, 2.5], interactive: true
+    });
     orbital(document.querySelector(".figure-canvas"));
 
     reveals();
