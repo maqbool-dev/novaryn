@@ -905,23 +905,6 @@ img, canvas { display: block; }
   pointer-events: none;
 }
 
-/* Second feature card: same chrome, flipped columns. Explicit placement rather
-   than row-reverse so the copy still comes first in the DOM (and on mobile,
-   where the media query clears the placement and it stacks copy-then-visual). */
-.work-feature-alt { margin-top: 20px; }
-
-.work-feature-alt .work-feature-body {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.work-feature-alt .work-visual {
-  grid-column: 1;
-  grid-row: 1;
-  border-left: 0;
-  border-right: 1px solid var(--border-secondary);
-}
-
 .work-mini-grid { margin-top: 20px; }
 
 .work-mini {
@@ -937,6 +920,26 @@ img, canvas { display: block; }
   border-color: var(--border-primary);
   box-shadow: var(--shadow-lg);
 }
+
+/* Linked variant keeps the card's own text colours rather than the global link green. */
+a.work-mini,
+a.work-mini:hover { color: var(--text-primary); }
+
+/* inline-block on the heading's own line-height: the arrow glyph falls back to a
+   font with taller metrics, which would otherwise grow the h3 line box by 3px and
+   knock this card's divider out of line with its neighbour's. */
+.work-go {
+  display: inline-block;
+  vertical-align: top;
+  line-height: 32px;
+  margin-left: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-disabled);
+  transition: color .12s var(--ease);
+}
+
+a.work-mini:hover .work-go { color: var(--brand-800); }
 
 .work-mini h3 {
   margin-bottom: 8px;
@@ -960,15 +963,10 @@ img, canvas { display: block; }
   gap: 10px;
   padding-top: 24px;
   border-top: 1px solid var(--border-secondary);
+  /* Fixed row height (24px padding + a 34px big-number line) so cards sitting
+     side by side keep their dividers and baselines aligned whatever fills them. */
+  min-height: 58px;
 }
-
-.strike {
-  font-size: 15px;
-  color: var(--text-disabled);
-  text-decoration: line-through;
-}
-
-.arrow-muted { color: var(--text-disabled); }
 
 .big-accent {
   font-size: 28px;
@@ -980,6 +978,28 @@ img, canvas { display: block; }
 .mini-label {
   font-size: 14px;
   color: var(--text-tertiary);
+}
+
+/* Reserved slot — same chrome, muted, and it does not lift on hover. Declared
+   after .work-mini h3 so the muted title wins the cascade. */
+.work-mini-next { box-shadow: none; }
+
+.work-mini-next:hover {
+  border-color: var(--border-secondary);
+  box-shadow: none;
+}
+
+.work-mini-next h3 { color: var(--text-quaternary); }
+
+.mini-soon {
+  /* Nudged onto the baseline the sibling card's big number sits on. */
+  display: inline-block;
+  padding-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-disabled);
 }
 
 /* =============================================================================
@@ -1231,14 +1251,6 @@ img, canvas { display: block; }
     border-top: 1px solid var(--border-secondary);
     min-height: 320px;
   }
-
-  .work-feature-alt .work-feature-body,
-  .work-feature-alt .work-visual {
-    grid-column: auto;
-    grid-row: auto;
-  }
-
-  .work-feature-alt .work-visual { border-right: 0; }
 
   /* Two-up metrics: the third cell starts a new row, so it loses its divider
      and the band gets symmetric padding instead of flush outer edges. */
