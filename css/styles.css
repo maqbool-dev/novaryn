@@ -980,28 +980,6 @@ a.work-mini:hover .work-go { color: var(--brand-800); }
   color: var(--text-tertiary);
 }
 
-/* Reserved slot — same chrome, muted, and it does not lift on hover. Declared
-   after .work-mini h3 so the muted title wins the cascade. */
-.work-mini-next { box-shadow: none; }
-
-.work-mini-next:hover {
-  border-color: var(--border-secondary);
-  box-shadow: none;
-}
-
-.work-mini-next h3 { color: var(--text-quaternary); }
-
-.mini-soon {
-  /* Nudged onto the baseline the sibling card's big number sits on. */
-  display: inline-block;
-  padding-top: 10px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--text-disabled);
-}
-
 /* =============================================================================
    Process
    ============================================================================= */
