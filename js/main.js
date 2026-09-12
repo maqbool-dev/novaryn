@@ -504,14 +504,16 @@
 
     document.querySelectorAll("[data-magnet]").forEach((el) => {
       const amt = parseFloat(el.dataset.magnet) || 5;
-      const base = el.style.transform || "";
       let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
 
+      /* `translate` rather than `transform`: elements that are also [data-reveal]
+         carry a transform of their own, and concatenating onto it would pin them
+         at the reveal's 22px start offset the first time they were hovered. */
       const tick = () => {
         raf = 0;
         cx += (tx - cx) * 0.18;
         cy += (ty - cy) * 0.18;
-        el.style.transform = base + " translate3d(" + cx.toFixed(2) + "px," + cy.toFixed(2) + "px,0)";
+        el.style.translate = cx.toFixed(2) + "px " + cy.toFixed(2) + "px";
         if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) raf = requestAnimationFrame(tick);
       };
       const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
