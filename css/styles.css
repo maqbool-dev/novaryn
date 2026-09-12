@@ -981,6 +981,287 @@ a.work-mini:hover .work-go { color: var(--brand-800); }
 }
 
 /* =============================================================================
+   Products — teaser panel on the home page, storefront grid on products.html
+   ============================================================================= */
+
+.product-teaser {
+  display: block;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow .2s var(--ease), border-color .2s var(--ease);
+}
+
+.product-teaser:hover {
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-2xl);
+}
+
+.product-teaser-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+}
+
+.product-body { padding: 44px; }
+
+.tag-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.tag-soon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-400);
+}
+
+.product-teaser h3 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 108;
+  font-size: clamp(27px, 2.7vw, 37px);
+  line-height: 1.12;
+  letter-spacing: -.025em;
+  font-weight: 700;
+}
+
+.product-teaser-lede {
+  max-width: 42ch;
+  margin-bottom: 28px;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--text-tertiary);
+}
+
+.product-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.product-kind {
+  padding: 6px 12px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* ---- The shelf: three covers stacked at rest that fan apart on hover ---- */
+
+.product-shelf {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+  padding: 40px;
+  overflow: hidden;                 /* clips the fan on narrow columns */
+  border-left: 1px solid var(--border-secondary);
+  background:
+    radial-gradient(120% 90% at 50% 6%, var(--bg-brand-primary), transparent 62%),
+    var(--bg-secondary);
+}
+
+.shelf-stack {
+  position: relative;
+  width: 168px;
+  height: 224px;
+}
+
+.shelf-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease);
+}
+
+/* Resting fan — a deliberate slight untidiness so it reads as a stack. */
+.shelf-card:nth-child(1) { transform: translate(-10px, 12px) rotate(-7deg); }
+.shelf-card:nth-child(2) { transform: translate(0, 0) rotate(-1deg); }
+.shelf-card:nth-child(3) { transform: translate(10px, 10px) rotate(6deg); }
+
+.product-teaser:hover .shelf-card:nth-child(1),
+.product-teaser:focus-visible .shelf-card:nth-child(1) { transform: translate(-96px, -10px) rotate(-13deg); }
+.product-teaser:hover .shelf-card:nth-child(2),
+.product-teaser:focus-visible .shelf-card:nth-child(2) { transform: translate(0, -26px) rotate(0deg); }
+.product-teaser:hover .shelf-card:nth-child(3),
+.product-teaser:focus-visible .shelf-card:nth-child(3) { transform: translate(96px, -10px) rotate(13deg); }
+
+.product-teaser:hover .shelf-card { box-shadow: var(--shadow-2xl); }
+
+.shelf-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--brand-200);
+  background: var(--bg-brand-primary);
+}
+
+.shelf-lines {
+  display: grid;
+  gap: 6px;
+}
+
+.shelf-lines i {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-secondary);
+}
+
+.shelf-lines i:first-child { width: 78%; }
+.shelf-lines i:last-child  { width: 50%; }
+
+.shelf-kind {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-quaternary);
+}
+
+/* =============================================================================
+   Products page
+   ============================================================================= */
+
+.page-head {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 96px var(--gutter) 0;
+}
+
+.page-title {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 108;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.06;
+  letter-spacing: -.03em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.page-lede {
+  max-width: 58ch;
+  margin-top: 20px;
+  font-size: 17px;
+  line-height: 28px;
+  color: var(--text-tertiary);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow .18s var(--ease), border-color .18s var(--ease);
+}
+
+a.product-card,
+a.product-card:hover { color: var(--text-primary); }
+
+.product-card:hover {
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.product-card h3 {
+  margin-bottom: 8px;
+  font-size: 22px;
+  line-height: 30px;
+  letter-spacing: -.02em;
+  font-weight: 600;
+}
+
+.product-card > p {
+  margin-bottom: 28px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-tertiary);
+}
+
+.product-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.product-price {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  color: var(--brand-800);
+}
+
+/* Shown while nothing is published — replace with .product-card items. */
+.product-empty {
+  display: grid;
+  place-items: center;
+  gap: 18px;
+  padding: 88px 32px;
+  text-align: center;
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--radius-2xl);
+  background: var(--bg-secondary);
+}
+
+.product-empty h2 {
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 108;
+  font-size: clamp(23px, 2.4vw, 30px);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  font-weight: 700;
+}
+
+.product-empty p {
+  max-width: 46ch;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--text-tertiary);
+}
+
+/* =============================================================================
    Process
    ============================================================================= */
 
@@ -1222,6 +1503,19 @@ a.work-mini:hover .work-go { color: var(--brand-800); }
 
   .work-feature-body { padding: 32px; }
 
+  /* Products: stack copy over shelf, and pull the fan in so it stays in frame. */
+  .product-teaser-grid { grid-template-columns: 1fr; }
+  .product-body { padding: 32px; }
+  .product-shelf {
+    border-left: 0;
+    border-top: 1px solid var(--border-secondary);
+    min-height: 300px;
+  }
+  .product-teaser:hover .shelf-card:nth-child(1) { transform: translate(-62px, -8px) rotate(-11deg); }
+  .product-teaser:hover .shelf-card:nth-child(3) { transform: translate(62px, -8px) rotate(11deg); }
+  .product-grid { grid-template-columns: 1fr; }
+  .page-head { padding-top: 56px; }
+
   /* Stacked: the divider between copy and canvas turns horizontal. Clearing the
      mirrored card's explicit placement lets both cards stack copy-first. */
   .work-visual {
@@ -1250,4 +1544,13 @@ a.work-mini:hover .work-go { color: var(--brand-800); }
   .pulse-ring { animation: none; }
 
   .marquee-track { animation-duration: 180s; }
+
+  /* The shelf keeps its resting stack rather than fanning. */
+  .shelf-card,
+  .product-teaser:hover .shelf-card:nth-child(1),
+  .product-teaser:hover .shelf-card:nth-child(2),
+  .product-teaser:hover .shelf-card:nth-child(3) { transition: none; }
+  .product-teaser:hover .shelf-card:nth-child(1) { transform: translate(-10px, 12px) rotate(-7deg); }
+  .product-teaser:hover .shelf-card:nth-child(2) { transform: translate(0, 0) rotate(-1deg); }
+  .product-teaser:hover .shelf-card:nth-child(3) { transform: translate(10px, 10px) rotate(6deg); }
 }
