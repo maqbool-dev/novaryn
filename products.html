@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products — Novaryn</title>
-  <meta name="description" content="Ebooks, tools and templates from Novaryn — drawn from the same systems we ship for clients.">
+  <meta name="description" content="The Mentor Mindset — a field guide to leading with direction and developing with humility. Ebooks and tools from Novaryn.">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="512x512" href="assets/novaryn-favicon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wdth,wght@75..125,400..800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
 
@@ -81,15 +81,39 @@
         <!-- Product cards go here. -->
       </div>
 
-      <div class="product-empty" data-reveal>
-        <div class="tag-soon">
-          <span class="tag-soon-dot" aria-hidden="true"></span>
-          <span>In production</span>
+      <article class="product-feature" data-reveal>
+        <div class="product-feature-grid">
+          <div class="product-cover-plate">
+            <img class="product-cover" src="assets/mentor-mindset-cover.webp"
+                 alt="Cover of The Mentor Mindset" width="720" height="1080" loading="lazy">
+          </div>
+
+          <div class="product-detail">
+            <div class="tag-live">
+              <span class="tag-live-dot" aria-hidden="true"></span>
+              <span>Ebook &middot; Leadership</span>
+            </div>
+            <h2>The Mentor Mindset</h2>
+            <p class="product-sub">How the Best Leaders Think, Grow, and Multiply the People Around Them</p>
+            <p class="product-blurb">Most leadership advice picks a side — be more decisive, or listen more. This field guide argues you need both postures: the Leader Mindset for direction and ownership, and the Mentor Mindset for growing the people around you. It covers when to use each, and how to hold both at once.</p>
+
+            <div class="product-specs">
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>9 chapters, 3 parts</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>48 pages</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>30-day challenge included</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>Print-ready PDF</span>
+            </div>
+
+            <div class="product-buy">
+              <span class="product-buy-price">$10<span class="product-buy-note">one-time</span></span>
+              <!-- Swap this href for a Gumroad / Lemon Squeezy / Stripe checkout link
+                   once one exists; the message flow works in the meantime. -->
+              <a href="https://wa.me/923207203369?text=Hi%20Novaryn%2C%20I%27d%20like%20to%20buy%20The%20Mentor%20Mindset%20%28%2410%29."
+                 target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-magnet="5">Buy the ebook<span class="btn-glyph" aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
         </div>
-        <h2>The first release is being finished now</h2>
-        <p>The shelf opens with an ebook on structuring a platform that survives its own growth. Message us and we'll tell you the day it lands.</p>
-        <a href="https://wa.me/923207203369" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-magnet="5">Tell me when it's out<span class="btn-glyph" aria-hidden="true">&rarr;</span></a>
-      </div>
+      </article>
     </section>
 
     <!-- ===== CTA ===== -->
@@ -155,6 +179,6 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=2"></script>
+  <script src="js/main.js?v=3"></script>
 </body>
 </html>
