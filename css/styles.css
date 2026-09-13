@@ -1232,6 +1232,124 @@ a.product-card:hover { color: var(--text-primary); }
   color: var(--brand-800);
 }
 
+/* ---- Feature card: the flagship product, cover beside the detail ---- */
+
+.product-feature {
+  display: block;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.product-feature-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  align-items: stretch;
+}
+
+/* The cover sits on its own tinted plate so the dark artwork has a margin
+   rather than bleeding into the card edge. */
+.product-cover-plate {
+  display: grid;
+  place-items: center;
+  padding: 48px;
+  border-right: 1px solid var(--border-secondary);
+  background:
+    radial-gradient(120% 90% at 50% 8%, var(--bg-brand-primary), transparent 64%),
+    var(--bg-secondary);
+}
+
+.product-cover {
+  width: 100%;
+  max-width: 268px;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2xl);
+  transition: transform .45s var(--ease);
+}
+
+.product-feature:hover .product-cover { transform: translateY(-6px) rotate(-1deg); }
+
+.product-detail { padding: 44px; }
+
+.product-detail h2 {
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 108;
+  font-size: clamp(27px, 2.7vw, 36px);
+  line-height: 1.12;
+  letter-spacing: -.025em;
+  font-weight: 700;
+}
+
+.product-sub {
+  margin-bottom: 20px;
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.product-blurb {
+  max-width: 52ch;
+  margin-bottom: 26px;
+  font-size: 15px;
+  line-height: 25px;
+  color: var(--text-tertiary);
+}
+
+.product-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-bottom: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.product-spec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+.product-spec-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--brand-500);
+}
+
+.product-buy {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.product-buy-price {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  color: var(--text-primary);
+}
+
+.product-buy-note {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-quaternary);
+}
+
 /* Shown while nothing is published — replace with .product-card items. */
 .product-empty {
   display: grid;
@@ -1514,6 +1632,13 @@ a.product-card:hover { color: var(--text-primary); }
   .product-teaser:hover .shelf-card:nth-child(1) { transform: translate(-62px, -8px) rotate(-11deg); }
   .product-teaser:hover .shelf-card:nth-child(3) { transform: translate(62px, -8px) rotate(11deg); }
   .product-grid { grid-template-columns: 1fr; }
+  .product-feature-grid { grid-template-columns: 1fr; }
+  .product-cover-plate {
+    padding: 40px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-secondary);
+  }
+  .product-detail { padding: 32px; }
   .page-head { padding-top: 56px; }
 
   /* Stacked: the divider between copy and canvas turns horizontal. Clearing the
@@ -1553,4 +1678,5 @@ a.product-card:hover { color: var(--text-primary); }
   .product-teaser:hover .shelf-card:nth-child(1) { transform: translate(-10px, 12px) rotate(-7deg); }
   .product-teaser:hover .shelf-card:nth-child(2) { transform: translate(0, 0) rotate(-1deg); }
   .product-teaser:hover .shelf-card:nth-child(3) { transform: translate(10px, 10px) rotate(6deg); }
+  .product-feature:hover .product-cover { transform: none; }
 }
