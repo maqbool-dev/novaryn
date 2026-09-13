@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wdth,wght@75..125,400..800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=3">
+  <link rel="stylesheet" href="css/styles.css?v=4">
 </head>
 <body>
 
@@ -105,11 +105,15 @@
             </div>
 
             <div class="product-buy">
-              <span class="product-buy-price">$10<span class="product-buy-note">one-time</span></span>
-              <!-- Swap this href for a Gumroad / Lemon Squeezy / Stripe checkout link
-                   once one exists; the message flow works in the meantime. -->
-              <a href="https://wa.me/923207203369?text=Hi%20Novaryn%2C%20I%27d%20like%20to%20buy%20The%20Mentor%20Mindset%20%28%2410%29."
-                 target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-magnet="5">Buy the ebook<span class="btn-glyph" aria-hidden="true">&rarr;</span></a>
+              <span class="product-buy-price">$14.99<span class="product-buy-note">one-time</span></span>
+              <!-- Gumroad overlay: gumroad.js turns any a.gumroad-button into a modal
+                   checkout on this page, so the buyer never leaves novaryn.art. No
+                   target="_blank" — that would break the overlay. If the script is
+                   blocked or fails, this degrades to a normal link to the product. -->
+              <a class="btn btn-primary btn-lg gumroad-button"
+                 href="https://novarynn.gumroad.com/l/thementorsmindset"
+                 data-gumroad-single-product="true"
+                 data-magnet="5">Buy the ebook<span class="btn-glyph" aria-hidden="true">&rarr;</span></a>
             </div>
           </div>
         </div>
@@ -159,7 +163,7 @@
           <div class="footer-col-title">Social</div>
           <nav class="footer-links" aria-label="Social">
             <a href="https://www.linkedin.com/company/novarynstudios" target="_blank" rel="noopener">LinkedIn</a>
-            <a href="#">Instagram</a>
+            <a href="https://www.instagram.com/novaryn.labs/" target="_blank" rel="noopener">Instagram</a>
             <a href="#">X / Twitter</a>
             <a href="#">Dribbble</a>
           </nav>
@@ -179,6 +183,8 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=3"></script>
+  <script src="js/main.js?v=4"></script>
+  <!-- Gumroad widget — include once, however many buy buttons the page grows. -->
+  <script src="https://gumroad.com/js/gumroad.js"></script>
 </body>
 </html>

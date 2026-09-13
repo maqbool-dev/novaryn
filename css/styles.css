@@ -1350,6 +1350,32 @@ a.product-card:hover { color: var(--text-primary); }
   color: var(--text-quaternary);
 }
 
+/* Gumroad's overlay script injects its own stylesheet at runtime, after ours,
+   and re-skins any .gumroad-button (black fill, its own font, 4px radius). We
+   can't read that sheet to match its specificity — it's served cross-origin —
+   so these are forced, and scoped to buttons that carry our own .btn class. */
+.btn.gumroad-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  height: auto !important;
+  padding: 14px 22px !important;
+  border: 0 !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--bg-brand-solid) !important;
+  color: var(--text-white) !important;
+  box-shadow: var(--shadow-skeuo-primary) !important;
+  font-family: var(--font-body) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+}
+
+.btn.gumroad-button:hover { background: var(--bg-brand-solid-hover) !important; }
+
 /* Shown while nothing is published — replace with .product-card items. */
 .product-empty {
   display: grid;
