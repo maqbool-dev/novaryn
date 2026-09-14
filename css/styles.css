@@ -1376,6 +1376,24 @@ a.product-card:hover { color: var(--text-primary); }
 
 .btn.gumroad-button:hover { background: var(--bg-brand-solid-hover) !important; }
 
+/* Every second feature mirrors — cover on the right — so a stacked list
+   alternates sides instead of marching down one edge. */
+.product-feature-alt .product-feature-grid { grid-template-columns: 1.15fr 0.85fr; }
+
+.product-feature-alt .product-cover-plate {
+  order: 2;
+  border-right: 0;
+  border-left: 1px solid var(--border-secondary);
+}
+
+/* Regulatory note under a product that needs one (e.g. the tax guide). */
+.product-note {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-quaternary);
+}
+
 /* Shown while nothing is published — replace with .product-card items. */
 .product-empty {
   display: grid;
@@ -1665,6 +1683,13 @@ a.product-card:hover { color: var(--text-primary); }
     border-bottom: 1px solid var(--border-secondary);
   }
   .product-detail { padding: 32px; }
+  /* Stacked, every feature leads with its cover — drop the mirroring. */
+  .product-feature-alt .product-feature-grid { grid-template-columns: 1fr; }
+  .product-feature-alt .product-cover-plate {
+    order: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--border-secondary);
+  }
   .page-head { padding-top: 56px; }
 
   /* Stacked: the divider between copy and canvas turns horizontal. Clearing the
