@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wdth,wght@75..125,400..800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=4">
+  <link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
 
@@ -59,27 +59,50 @@
     </div>
 
     <!-- ===== Catalogue =====
-         To publish a product, delete the .product-empty block below and drop a
-         copy of this card into .product-grid for each one. External checkout
-         links need target="_blank" rel="noopener"; internal ones don't.
-
-         <a class="product-card" href="#" data-reveal>
-           <div class="tag-live">
-             <span class="tag-live-dot" aria-hidden="true"></span>
-             <span>Ebook</span>
-           </div>
-           <h3>Product name</h3>
-           <p>One or two lines on what the reader walks away able to do.</p>
-           <div class="product-foot">
-             <span class="product-price">$29</span>
-             <span class="work-go" aria-hidden="true">&#8599;</span>
-           </div>
-         </a>
-    -->
+         Each product is a .product-feature block. Add .product-feature-alt to
+         every other one so the covers alternate sides down the page.
+         The buy link needs class="gumroad-button" and NO target="_blank" —
+         gumroad.js opens the checkout in a modal on this page. The widget
+         script is included once, at the end of the document. -->
     <section class="section">
       <div class="product-grid">
         <!-- Product cards go here. -->
       </div>
+
+      <article class="product-feature product-feature-alt" data-reveal>
+        <div class="product-feature-grid">
+          <div class="product-cover-plate">
+            <img class="product-cover" src="assets/gig-drivers-tax-playbook-cover.webp"
+                 alt="Cover of The Gig Driver's Tax Playbook" width="720" height="1080" loading="lazy">
+          </div>
+
+          <div class="product-detail">
+            <div class="tag-live">
+              <span class="tag-live-dot" aria-hidden="true"></span>
+              <span>Ebook &middot; 2026 edition</span>
+            </div>
+            <h2>The Gig Driver's Tax Playbook</h2>
+            <p class="product-sub">Every Deduction, Credit, and Form You're Owed as an Uber, Lyft, DoorDash, or Instacart Driver</p>
+            <p class="product-blurb">The moment a platform pays you as a contractor instead of an employee, you're running a business — and most drivers pay more than they owe because nobody explained the deductions. This covers the 2026 mileage rates, the new tips and QBI deductions, quarterly payments, and the exact form that claims each one.</p>
+
+            <div class="product-specs">
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>11 chapters, 4 parts</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>58 pages</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>3 appendices</span>
+              <span class="product-spec"><span class="product-spec-dot" aria-hidden="true"></span>Print-ready PDF</span>
+            </div>
+
+            <div class="product-buy">
+              <span class="product-buy-price">$9.99<span class="product-buy-note">one-time</span></span>
+              <a class="btn btn-primary btn-lg gumroad-button"
+                 href="https://novarynn.gumroad.com/l/TheGigDriversTaxPlaybook"
+                 data-gumroad-single-product="true"
+                 data-magnet="5">Buy the ebook<span class="btn-glyph" aria-hidden="true">&rarr;</span></a>
+            </div>
+            <p class="product-note">General tax education, not personalised tax or legal advice. Confirm anything specific to your return with a licensed CPA or enrolled agent.</p>
+          </div>
+        </div>
+      </article>
 
       <article class="product-feature" data-reveal>
         <div class="product-feature-grid">
@@ -183,7 +206,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=4"></script>
+  <script src="js/main.js?v=5"></script>
   <!-- Gumroad widget — include once, however many buy buttons the page grows. -->
   <script src="https://gumroad.com/js/gumroad.js"></script>
 </body>
