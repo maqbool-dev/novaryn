@@ -79,8 +79,10 @@
   --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
 
   /* ---- Layout ---- */
-  --container: 1440px;   /* content shell; backgrounds stay full-bleed */
-  --gutter: 32px;
+  /* Fluid shell: fills the screen, capped only on ultra-wide displays so
+     very large monitors don't stretch the layout. Prose has its own caps. */
+  --container: 2200px;
+  --gutter: clamp(32px, 3vw, 80px);  /* 20px on mobile, set in the breakpoint */
 
   --ease: cubic-bezier(.4, 0, .2, 1);
 }
@@ -443,7 +445,7 @@ img, canvas { display: block; }
 .hero-title {
   font-family: var(--font-display);
   font-variation-settings: "wdth" 100;
-  font-size: clamp(40px, 5.2vw, 78px);
+  font-size: clamp(40px, 5.2vw, 100px);
   line-height: .9;
   letter-spacing: -.026em;
   font-weight: 800;
@@ -487,7 +489,7 @@ img, canvas { display: block; }
   position: relative;
   justify-self: center;
   width: 100%;
-  max-width: 460px;
+  max-width: clamp(460px, 30vw, 620px);
   aspect-ratio: 1 / 1;
 }
 
@@ -718,6 +720,7 @@ img, canvas { display: block; }
 }
 
 .service-card p {
+  max-width: 62ch;   /* keep lines readable when the grid widens */
   font-size: 15px;
   line-height: 24px;
   color: var(--text-tertiary);
@@ -951,6 +954,7 @@ a.work-mini:hover .work-go { color: var(--brand-800); }
 }
 
 .work-mini > p {
+  max-width: 62ch;
   margin-bottom: 28px;
   font-size: 15px;
   line-height: 24px;
